@@ -1,5 +1,3 @@
-const DashboardPage = () => {
-  return <div className="text-white">dashboardPage</div>;
+export const dashboard = () => {
+  return <div>dashboard</div>;
 };
-
-export default DashboardPage;
