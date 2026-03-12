@@ -8,13 +8,13 @@ export const navItems = [
     icon: LayoutDashboard,
   },
   {
-    path: "/simulation",
-    name: "Simulation",
+    path: "/challenges",
+    name: "Challenges",
     icon: LayoutDashboard,
   },
   {
-    path: "/analytics",
-    name: "Analytics",
+    path: "/leaderboard",
+    name: "Leaderboard",
     icon: LayoutDashboard,
   },
   // Add more nav items here
