@@ -17,7 +17,7 @@ type Props = {
   isAdmin?: boolean;
 };
 
-const EMPTY: any[] = [];
+const EMPTY: Challenge[] = [];
 
 export default function ChallengeCategory({ category, idx, isAdmin }: Props) {
   const dispatch = useDispatch<AppDispatch>();
