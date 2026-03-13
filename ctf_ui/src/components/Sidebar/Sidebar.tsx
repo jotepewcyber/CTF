@@ -66,7 +66,7 @@ export default function Sidebar({
                 ${collapsed ? "w-10 h-10 text-lg font-bold rounded-full bg-green-100 dark:bg-green-900" : "text-2xl font-extrabold"}
               `}
             >
-              {collapsed ? <span>C</span> : "Carbonsim"}
+              {collapsed ? <span>C</span> : "CTF"}
             </div>
             <button
               className="mt-2 text-gray-700 dark:text-gray-200 hover:text-green-500 p-2 rounded-full"

@@ -3,7 +3,7 @@ import { LayoutDashboard } from "lucide-react";
 // Example navItems data structure
 export const navItems = [
   {
-    path: "/",
+    path: "/dashboard",
     name: "Dashboard",
     icon: LayoutDashboard,
   },
@@ -15,6 +15,12 @@ export const navItems = [
   {
     path: "/leaderboard",
     name: "Leaderboard",
+    icon: LayoutDashboard,
+  },
+  // this is only for admin, you can conditionally render it based on user role
+  {
+    path: "/users",
+    name: "Users",
     icon: LayoutDashboard,
   },
   // Add more nav items here

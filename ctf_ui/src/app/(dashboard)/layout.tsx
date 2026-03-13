@@ -3,6 +3,7 @@ import { useState } from "react";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Header from "@/components/Header/header";
 import ReduxProvider from "@/providers/ReduxProvider";
+import AuthGuard from "@/components/AuthGuard";
 // import AuthGuard from "@/components/AuthGuard";
 
 export default function DashboardLayout({
@@ -46,9 +47,7 @@ export default function DashboardLayout({
           {/* page content */}
           <div className="pt-6">
             <ReduxProvider>
-              {/* <AuthGuard> */}
-              {children}
-              {/* </AuthGuard> */}
+              <AuthGuard>{children}</AuthGuard>
             </ReduxProvider>
           </div>
         </div>

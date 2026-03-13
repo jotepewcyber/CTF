@@ -16,7 +16,7 @@ class Challenge(models.Model):
     url = models.URLField(blank=True)
     level = models.CharField(max_length=16, choices=LEVEL_CHOICES)
     points = models.PositiveIntegerField()
-    flag = models.CharField(max_length=255)  # Store securely in production!
+    flag = models.CharField(max_length=255) 
 
     def __str__(self):
         return self.name
