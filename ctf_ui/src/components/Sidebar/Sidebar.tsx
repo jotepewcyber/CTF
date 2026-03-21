@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { navItems } from "./NavItems";
+import { RootState } from "@/store";
+import { useSelector } from "react-redux";
 
 type SidebarProps = {
   collapsed: boolean;
@@ -18,6 +20,8 @@ export default function Sidebar({
   onClose,
 }: SidebarProps) {
   const [sidebarTransitioning, setSidebarTransitioning] = useState(false);
+  const user = useSelector((state: RootState) => state.auth.user);
+  const isAdmin = user?.role === "admin";
 
   return (
     <div>
@@ -66,7 +70,7 @@ export default function Sidebar({
                 ${collapsed ? "w-10 h-10 text-lg font-bold rounded-full bg-green-100 dark:bg-green-900" : "text-2xl font-extrabold"}
               `}
             >
-              {collapsed ? <span>C</span> : "Carbonsim"}
+              {collapsed ? <span>C</span> : "CTF"}
             </div>
             <button
               className="mt-2 text-gray-700 dark:text-gray-200 hover:text-green-500 p-2 rounded-full"
@@ -116,30 +120,32 @@ export default function Sidebar({
             </button>
           </div>
           <nav className={`mt-2 space-y-2`}>
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                href={item.path}
-                className={`flex items-center w-full rounded-lg transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer ${
-                  collapsed
-                    ? "justify-center px-0 py-2 gap-0"
-                    : "justify-start px-3 py-2 gap-3 text-left"
-                } text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#222c37] hover:text-theme-primary dark:hover:text-green-400`}
-                title={collapsed ? item.name : undefined}
-                onClick={onClose}
-              >
-                <span className="flex items-center justify-center transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]">
-                  <item.icon />
-                </span>
-                <span
-                  className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                    collapsed ? "opacity-0 max-w-0" : "opacity-100 max-w-45"
-                  }`}
+            {navItems
+              .filter((item) => !item.adminOnly || isAdmin)
+              .map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className={`flex items-center w-full rounded-lg transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer ${
+                    collapsed
+                      ? "justify-center px-0 py-2 gap-0"
+                      : "justify-start px-3 py-2 gap-3 text-left"
+                  } text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#222c37] hover:text-theme-primary dark:hover:text-green-400`}
+                  title={collapsed ? item.name : undefined}
+                  onClick={onClose}
                 >
-                  {item.name}
-                </span>
-              </Link>
-            ))}
+                  <span className="flex items-center justify-center transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]">
+                    <item.icon />
+                  </span>
+                  <span
+                    className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                      collapsed ? "opacity-0 max-w-0" : "opacity-100 max-w-45"
+                    }`}
+                  >
+                    {item.name}
+                  </span>
+                </Link>
+              ))}
           </nav>
         </aside>
 
@@ -184,16 +190,18 @@ export default function Sidebar({
             </button>
           </div>
           <nav className="space-y-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                href={item.path}
-                className="block w-full text-left px-4 py-2 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#222c37] hover:text-theme-primary dark:hover:text-green-400"
-                onClick={onClose}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {navItems
+              .filter((item) => !item.adminOnly || isAdmin)
+              .map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className="block w-full text-left px-4 py-2 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#222c37] hover:text-theme-primary dark:hover:text-green-400"
+                  onClick={onClose}
+                >
+                  {item.name}
+                </Link>
+              ))}
           </nav>
         </aside>
       </div>

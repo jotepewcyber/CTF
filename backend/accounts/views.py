@@ -5,7 +5,11 @@ from .models import User
 from .serializers import UserRegisterSerializer, UserDisplaySerializer
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
+
+class IsAdminRole(BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated and getattr(request.user, "role", None) == "admin")
 
 # --- Registration ---
 class RegisterAPIView(APIView):
@@ -43,6 +47,14 @@ class LoginAPIView(APIView):
             return response
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        
+class UserListAPIView(APIView):
+    permission_classes = [IsAdminRole]
+    
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserDisplaySerializer(users, many=True)
+        return Response(serializer.data)
 
 # --- User Profile Management ---
 class UserDetailAPIView(APIView):
