@@ -2,9 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from .models import Category, Challenge, ChallengeSolve
+from django.db.models import Sum, F
 from .serializers import (
     CategorySerializer, ChallengeCardSerializer,
-    ChallengeDetailSerializer, SolveSubmissionSerializer, ChallengeCreateSerializer
+    ChallengeDetailSerializer, SolveSubmissionSerializer, ChallengeCreateSerializer, LeaderboardEntrySerializer
 )
 from django.shortcuts import get_object_or_404
 
@@ -63,19 +64,35 @@ class ChallengeSolveAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request, pk):
         challenge = get_object_or_404(Challenge, pk=pk)
+
+        # First, check if the user has already solved the challenge
+        if ChallengeSolve.objects.filter(user=request.user, challenge=challenge).exists():
+            return Response(
+                {"result": "already_solved", "message": "You have already solved this challenge!"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         serializer = SolveSubmissionSerializer(data=request.data)
         if serializer.is_valid():
             submitted_flag = serializer.validated_data['flag']
-            # Case-insensitive compare and strip
             if submitted_flag.strip() == challenge.flag.strip():
-                # Create solve if not already solved
-                solve, created = ChallengeSolve.objects.get_or_create(
-                    user=request.user, challenge=challenge
-                )
-                if created:
-                    return Response({"result": "correct", "message": "Flag correct! Challenge solved."})
-                else:
-                    return Response({"result": "already_solved", "message": "Challenge already solved."})
+                ChallengeSolve.objects.create(user=request.user, challenge=challenge)
+                return Response({"result": "correct", "message": "Flag correct! Challenge solved."})
             else:
-                return Response({"result": "wrong", "message": "Wrong flag!"}, status=400)
-        return Response(serializer.errors, status=400)    
+                return Response({"result": "wrong", "message": "Wrong flag!"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
+
+
+class ScoreboardAPIView(APIView):
+    permission_classes = []  # Public
+
+    def get(self, request):
+        # For each user, compute the sum of challenge.points they have solved
+        solved_data = (
+            ChallengeSolve.objects
+            .values(username=F('user__username'))
+            .annotate(total_points=Sum('challenge__points'))
+            .order_by('-total_points')
+        )
+        serializer = LeaderboardEntrySerializer(solved_data, many=True)
+        return Response(serializer.data)

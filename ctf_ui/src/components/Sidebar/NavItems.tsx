@@ -22,6 +22,7 @@ export const navItems = [
     path: "/users",
     name: "Users",
     icon: LayoutDashboard,
+    adminOnly: true,
   },
   // Add more nav items here
 ];

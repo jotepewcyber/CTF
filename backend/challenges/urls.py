@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     CategoryListCreateAPIView, ChallengeListByCategoryAPIView,
-    ChallengeCreateAPIView, ChallengeDetailAPIView, ChallengeSolveAPIView
+    ChallengeCreateAPIView, ChallengeDetailAPIView, ChallengeSolveAPIView, ScoreboardAPIView
 )
 
 urlpatterns = [
@@ -10,4 +10,7 @@ urlpatterns = [
     path('questions/create/', ChallengeCreateAPIView.as_view()),
     path('questions/<int:pk>/', ChallengeDetailAPIView.as_view()),
     path('questions/<int:pk>/submit/', ChallengeSolveAPIView.as_view()),
+
+    # scoreboard endpoint
+    path('scoreboard/', ScoreboardAPIView.as_view(), name='scoreboard'),
 ]

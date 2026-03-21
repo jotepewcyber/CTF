@@ -28,3 +28,7 @@ class ChallengeCreateSerializer(serializers.ModelSerializer):
 
 class SolveSubmissionSerializer(serializers.Serializer):
     flag = serializers.CharField()
+
+class LeaderboardEntrySerializer(serializers.Serializer):
+    username = serializers.CharField()
+    total_points = serializers.IntegerField()

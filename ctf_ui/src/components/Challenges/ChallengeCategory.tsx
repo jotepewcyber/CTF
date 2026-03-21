@@ -1,8 +1,10 @@
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "@/store";
 import ChallengeCard from "./ChallengeCard";
+import AddQuestionModal from "./AddQuestionModal";
 import { fetchChallengesByCategoryThunk } from "@/store/features/Question/questionThunks";
+import ChallengeDetailModal from "./Questions/ChallengeDetailModal";
 
 type Challenge = {
   id: number;
@@ -21,7 +23,12 @@ const EMPTY: Challenge[] = [];
 
 export default function ChallengeCategory({ category, idx, isAdmin }: Props) {
   const dispatch = useDispatch<AppDispatch>();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedChallengeId, setSelectedChallengeId] = useState<number | null>(
+    null,
+  );
 
   const challenges = useSelector(
     (state: RootState) => state.question.challenges[category.id] || EMPTY,
@@ -29,7 +36,6 @@ export default function ChallengeCategory({ category, idx, isAdmin }: Props) {
   const loading = useSelector(
     (state: RootState) => state.question.loading[category.id],
   );
-
   const loaded = useSelector(
     (state: RootState) => state.question.loaded[category.id],
   );
@@ -44,68 +50,45 @@ export default function ChallengeCategory({ category, idx, isAdmin }: Props) {
   }, [open, category.id, loading, loaded, dispatch]);
 
   return (
-    <div
-      style={{
-        marginBottom: 32,
-        background: "#fff",
-        borderRadius: 10,
-        boxShadow: "0 2px 8px #e0e0eb",
-      }}
-    >
-      <div
-        style={{
-          padding: "14px 24px",
-          fontSize: 17,
-          fontWeight: 600,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
+    <div className="mb-8 bg-white rounded-xl shadow-md">
+      <div className="py-3 px-6 text-lg font-semibold flex items-center justify-between">
         <div>
           {idx + 1}. {category.name}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="flex items-center gap-3">
           {isAdmin && (
-            <button
-              style={{
-                fontSize: 13,
-                padding: "3px 10px",
-                borderRadius: 6,
-                marginRight: 10,
-                border: "1px solid #999",
-                background: "#fafbfe",
-                cursor: "pointer",
-              }}
-              // onClick={...}
-            >
-              + Add Challenge
-            </button>
+            <>
+              <button
+                className="text-sm px-3 py-0.75 rounded border border-gray-400 bg-gray-50 hover:bg-blue-100 mr-2 transition"
+                onClick={() => setModalOpen(true)}
+              >
+                + Add Question
+              </button>
+              <AddQuestionModal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                categoryId={category.id}
+              />
+            </>
           )}
           <button
             aria-label="Expand"
             onClick={() => setOpen((v) => !v)}
-            style={{
-              border: 0,
-              background: "none",
-              fontSize: 20,
-              cursor: "pointer",
-            }}
+            className="border-none bg-transparent text-xl cursor-pointer focus:outline-none ml-2"
           >
             {open ? "▲" : "▼"}
           </button>
         </div>
       </div>
       {open && (
-        <div
-          style={{ padding: "14px 24px", display: "flex", flexWrap: "wrap" }}
-        >
+        <div className="px-6 pb-6 flex flex-wrap">
           {loading ? (
-            <div>Loading...</div>
+            <div className="text-gray-500 py-4">Loading...</div>
           ) : error ? (
-            <div>
-              <span style={{ color: "red" }}>Error: {error}</span>{" "}
+            <div className="text-red-600 flex items-center gap-2">
+              Error: {error}
               <button
+                className="ml-2 px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200 border border-red-200"
                 onClick={() =>
                   dispatch(fetchChallengesByCategoryThunk(category.id))
                 }
@@ -114,7 +97,7 @@ export default function ChallengeCategory({ category, idx, isAdmin }: Props) {
               </button>
             </div>
           ) : loaded && challenges.length === 0 ? (
-            <div style={{ fontStyle: "italic", opacity: 0.8 }}>
+            <div className="italic opacity-80 py-4">
               No questions found. Questions coming soon!
             </div>
           ) : (
@@ -124,9 +107,22 @@ export default function ChallengeCategory({ category, idx, isAdmin }: Props) {
                 name={c.name}
                 level={c.level}
                 points={c.points}
+                onClick={() => {
+                  setSelectedChallengeId(c.id);
+                  setDetailModalOpen(true);
+                }}
               />
             ))
           )}
+          {/* Detail modal at the bottom so it overlays everything */}
+          <ChallengeDetailModal
+            open={detailModalOpen}
+            onClose={() => {
+              setDetailModalOpen(false);
+              setSelectedChallengeId(null);
+            }}
+            challengeId={selectedChallengeId}
+          />
         </div>
       )}
     </div>

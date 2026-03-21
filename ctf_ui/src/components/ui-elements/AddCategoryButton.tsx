@@ -1,18 +1,24 @@
-export default function AddCategoryButton({ isAdmin }: { isAdmin: boolean }) {
+export default function AddCategoryButton({
+  isAdmin,
+  onClick,
+}: {
+  isAdmin: boolean;
+  onClick?: () => void;
+}) {
   if (!isAdmin) return null;
   return (
     <button
       style={{
-        fontSize: 15,
-        padding: "5px 12px",
-        borderRadius: 7,
-        border: "1px solid #888",
-        background: "#f9f9ff",
-        float: "right",
-        marginBottom: 14,
+        background: "#2f3dec",
+        color: "#fff",
+        borderRadius: 6,
+        padding: "8px 16px",
+        border: "none",
         cursor: "pointer",
+        fontWeight: 600,
+        fontSize: 15,
       }}
-      // onClick={...}
+      onClick={onClick}
     >
       + Add Category
     </button>

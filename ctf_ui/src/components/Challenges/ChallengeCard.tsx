@@ -2,8 +2,9 @@ type Props = {
   name: string;
   level: string;
   points: number;
+  onClick?: () => void;
 };
-export default function ChallengeCard({ name, level, points }: Props) {
+export default function ChallengeCard({ name, level, points, onClick }: Props) {
   return (
     <div
       style={{
@@ -17,6 +18,7 @@ export default function ChallengeCard({ name, level, points }: Props) {
         flexDirection: "column",
         justifyContent: "center",
       }}
+      onClick={onClick}
     >
       <div>
         <b>{level}</b> | <b>{points} pts</b>

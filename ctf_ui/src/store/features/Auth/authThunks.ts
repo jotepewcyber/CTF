@@ -46,7 +46,7 @@ export const fetchMeThunk = createAsyncThunk(
     // @ts-ignore
     const access = getState().auth.access;
     try {
-      const { data } = await fetchMe(access); // Use wrapper, pass token if you want
+      const { data } = await fetchMe(); // Use wrapper, pass token if you want
       return data;
     } catch (err: any) {
       const errorDetail =
