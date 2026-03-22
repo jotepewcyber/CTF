@@ -28,4 +28,26 @@ export const getScoreboard = () => api.get("challenges/scoreboard/");
 
 export const getUsers = () => api.get("accounts/users/");
 
+//endpoint for competition
+// Public: Get current competition info (for timer)
+export const getCompetitionInfo = () => api.get("/competition/info/");
+
+// Admin: Get all competitions
+export const getCompetitionsAdmin = () => api.get("/competition/admin/");
+
+// Admin: Create a new competition
+export const createCompetition = (data: {
+  name: string;
+  start_time: string;
+  end_time: string;
+  is_active: boolean;
+}) => api.post("/competition/admin/", data);
+
+// Admin: Update a competition
+export const updateCompetition = (id: number, data: any) =>
+  api.put(`/competition/admin/${id}/`, data);
+
+export const deleteCompetition = (id: number) =>
+  api.delete(`/competition/admin/${id}/`);
+
 export { api };

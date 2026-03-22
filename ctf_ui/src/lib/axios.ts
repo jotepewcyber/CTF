@@ -34,7 +34,8 @@ api.interceptors.response.use(
         try {
           const res = await axios.post(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}accounts/refresh/`,
-            { refresh },
+            {},
+            { withCredentials: true }, // ENSURE this!!
           );
           console.log("Token refreshed", res.data);
           const { access } = res.data;
@@ -45,7 +46,6 @@ api.interceptors.response.use(
         } catch (refreshError) {
           // On failure, force logout
           localStorage.removeItem("access");
-          localStorage.removeItem("refresh");
           // You might want to dispatch(logout()) here
           window.location.href = "/login";
         }

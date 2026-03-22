@@ -8,10 +8,9 @@ from .serializers import (
     ChallengeDetailSerializer, SolveSubmissionSerializer, ChallengeCreateSerializer, LeaderboardEntrySerializer
 )
 from django.shortcuts import get_object_or_404
-
-# === Custom IsAdmin permission (using your User "role" field) ===
 from .permissions import IsAdminRole
-
+from competition.utils import is_competition_running
+from competition.utils import get_active_competition
 
 
 # --- CATEGORY VIEWS ---
@@ -36,6 +35,9 @@ class CategoryListCreateAPIView(APIView):
 class ChallengeListByCategoryAPIView(APIView):
     permission_classes = [permissions.AllowAny]
     def get(self, request, category_id):
+        competition = get_active_competition()
+        if not competition:
+            return Response({"detail": "Competition not running!"}, status=403)
         challenges = Challenge.objects.filter(category_id=category_id)
         serializer = ChallengeCardSerializer(challenges, many=True)
         return Response(serializer.data)
@@ -61,6 +63,11 @@ class ChallengeDetailAPIView(APIView):
 class ChallengeSolveAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request, pk):
+        if not is_competition_running():
+            return Response(
+                {'detail': 'Competition is not running.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
         challenge = get_object_or_404(Challenge, pk=pk)
 
         # First, check if the user has already solved the challenge
