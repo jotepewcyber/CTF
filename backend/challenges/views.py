@@ -10,11 +10,9 @@ from .serializers import (
 from django.shortcuts import get_object_or_404
 
 # === Custom IsAdmin permission (using your User "role" field) ===
-from rest_framework.permissions import BasePermission
+from .permissions import IsAdminRole
 
-class IsAdminRole(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and getattr(request.user, "role", None) == "admin"
+
 
 # --- CATEGORY VIEWS ---
 class CategoryListCreateAPIView(APIView):
