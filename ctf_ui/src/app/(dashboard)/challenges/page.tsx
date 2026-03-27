@@ -10,6 +10,8 @@ import AddCategoryForm from "@/components/Challenges/AddCategoryForm";
 import { fetchMeThunk } from "@/store/features/Auth/authThunks";
 import { fetchCompetitionInfoThunk } from "@/store/features/Competition/competitionThunks";
 import { useRouter } from "next/navigation";
+import { AlertCircle, Loader } from "lucide-react";
+import Lights from "@/components/Dashboard/dashboard";
 
 export default function ChallengesPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -19,16 +21,13 @@ export default function ChallengesPage() {
   const catLoading = useSelector((state: RootState) => state.category.loading);
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === "admin";
-  console.log("ChallengesPage rendered", { categories, catLoading, isAdmin });
+
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const competition = useSelector((state: RootState) => state.competition.info);
   const competitionLoading = useSelector(
     (state: RootState) => state.competition.loading,
   );
-  // const competitionError = useSelector(
-  //   (state: RootState) => state.competition.error,
-  // );
 
   useEffect(() => {
     dispatch(fetchMeThunk());
@@ -43,54 +42,84 @@ export default function ChallengesPage() {
       const start = new Date(competition.start_time);
       const end = new Date(competition.end_time);
       if (!competition.is_active || now < start) {
-        // Option 1: Redirect
         router.replace("/competition?notstarted=1");
-        // Option 2: To just show a message, set a local error state instead
       } else if (now > end) {
         router.replace("/competition?ended=1");
       }
     }
   }, [competition, competitionLoading, router]);
 
-  if (competitionLoading || !competition)
-    return <div>Loading competition status...</div>;
+  if (competitionLoading || !competition) {
+    return (
+      <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/50">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin mx-auto"></div>
+          <p className="text-emerald-200 mt-4 font-semibold">
+            Loading challenges...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div
-      style={{
-        padding: "36px 38px 16px 38px",
-        background: "#fcfcff",
-        minHeight: "100vh",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
-        }}
-      >
-        <AddCategoryButton
-          isAdmin={isAdmin}
-          onClick={() => setModalOpen(true)}
-        />
-      </div>
-      <CategoryModal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <AddCategoryForm onSuccess={() => setModalOpen(false)} />
-      </CategoryModal>
-      <div>
-        {catLoading ? (
-          <div>Loading Categories...</div>
-        ) : (
-          categories.map((cat: any, idx: number) => (
-            <ChallengeCategory
-              key={cat.id}
-              category={cat}
-              idx={idx}
+    <div className="relative w-full min-h-screen pt-15 md:pt-0">
+      <Lights />
+
+      <div className="relative z-40 w-full">
+        {/* Header Section */}
+        <div className="px-6 md:px-12 py-8 md:mt-4 md:mx-6 md:rounded-xl border-b md:border border-emerald-500/10 bg-linear-to-r from-slate-900/50 via-slate-900/30 to-slate-900/50 backdrop-blur-sm">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-teal-300">
+                Challenges
+              </h1>
+              <p className="text-emerald-200/60 mt-2">
+                Complete challenges to earn points
+              </p>
+            </div>
+            <AddCategoryButton
               isAdmin={isAdmin}
+              onClick={() => setModalOpen(true)}
             />
-          ))
-        )}
+          </div>
+        </div>
+
+        {/* Modal */}
+        <CategoryModal open={modalOpen} onClose={() => setModalOpen(false)}>
+          <AddCategoryForm onSuccess={() => setModalOpen(false)} />
+        </CategoryModal>
+
+        {/* Categories Section */}
+        <div className="px-6 md:px-12 py-8 md:py-12">
+          {catLoading ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader size={32} className="text-emerald-400 animate-spin" />
+              <p className="text-emerald-200 mt-4">Loading categories...</p>
+            </div>
+          ) : categories.length === 0 ? (
+            <div className="max-w-2xl mx-auto p-8 rounded-xl bg-slate-800/30 border border-emerald-500/20 text-center">
+              <AlertCircle
+                size={32}
+                className="text-emerald-400 mx-auto mb-3"
+              />
+              <p className="text-emerald-200 font-medium">
+                No categories available yet. Check back soon!
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6 max-w-4xl mx-auto">
+              {categories.map((cat: any, idx: number) => (
+                <ChallengeCategory
+                  key={cat.id}
+                  category={cat}
+                  idx={idx}
+                  isAdmin={isAdmin}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

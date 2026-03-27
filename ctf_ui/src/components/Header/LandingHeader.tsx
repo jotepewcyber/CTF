@@ -2,10 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-// import Image from "next/image";
-// import LandingNavbarLogo from "../../assets/images/Logo_down_light.svg";
 
 export default function LandingHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -23,7 +21,6 @@ export default function LandingHeader() {
     }
   }, []);
 
-  // Hide on scroll (mobile only)
   useEffect(() => {
     const onScroll = () => {
       const curr = window.scrollY;
@@ -43,7 +40,6 @@ export default function LandingHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Dropdown close on outside click (mobile)
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -58,15 +54,10 @@ export default function LandingHeader() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
-  // Brand bar
-  const BrandBar = (
-    <div className="absolute left-0 right-0 top-0 h-1 bg-linear-to-r from-emerald-400 via-emerald-500 to-green-300 rounded-t-2xl opacity-80" />
-  );
-
   const navItems = [
-    { href: "#features", label: "Features" },
-    { href: "#why-choose-us", label: "Why Choose Us" },
-    { href: "#pricing", label: "Pricing" },
+    { href: "#aboutus", label: "About us" },
+    { href: "#contactus", label: "Contact Us" },
+    { href: "#results", label: "Results" },
   ];
 
   return (
@@ -74,9 +65,9 @@ export default function LandingHeader() {
       {/* Mobile Navbar */}
       <header
         className={`
-          w-full flex items-center justify-between px-2 py-1 md:hidden
-          fixed top-0 left-0 right-0 z-110
-          backdrop-blur-md shadow-lg border-b border-emerald-100/20
+          w-full flex items-center justify-between px-4 py-3 md:hidden
+          fixed top-0 left-0 right-0 z-50
+          bg-black border-b border-emerald-500/20
           transition-transform duration-300
           ${
             show
@@ -84,50 +75,48 @@ export default function LandingHeader() {
               : "-translate-y-full opacity-0 pointer-events-none"
           }
         `}
-        style={{ height: "3rem" }}
       >
-        {/* Brand/Logo */}
-        <div className="flex items-center gap-2">
-          <Link href="/" className="select-none flex items-center">
-            {/* <Image
-              src={LandingNavbarLogo}
-              alt="CTF Logo"
-              width={100}
-              height={32}
-              priority
-              className="h-8 w-auto"
-            /> */}
-          </Link>
-        </div>
-        {/* Hamburger and dropdown */}
+        <Link href="/" className="select-none flex items-center">
+          <span className="text-lg font-black text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-teal-300 tracking-wider">
+            CTF Arena
+          </span>
+        </Link>
+
         <div className="relative" ref={menuRef}>
           <button
             className="
-              flex items-center justify-center rounded-full p-2
-              border border-emerald-400
-              bg-white/10 hover:bg-white/20 active:bg-white/30 transition
+              flex items-center justify-center rounded-lg p-2
+              border border-emerald-500/30
+              bg-emerald-500/10 hover:bg-emerald-500/20 active:bg-emerald-500/30 transition
             "
             aria-label="Toggle menu"
             onClick={() => setMenuOpen((v) => !v)}
           >
-            <Menu size={22} className="text-emerald-200" />
+            {menuOpen ? (
+              <X size={20} className="text-emerald-400" />
+            ) : (
+              <Menu size={20} className="text-emerald-400" />
+            )}
           </button>
+
           {menuOpen && (
-            <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-900 border border-emerald-200/30 rounded-xl shadow-xl z-50 overflow-hidden flex flex-col py-2">
+            <div className="absolute right-0 mt-3 w-56 bg-black border border-emerald-500/30 rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col py-2">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block px-6 py-2 text-emerald-900 dark:text-emerald-100 hover:bg-emerald-50/80 dark:hover:bg-emerald-900/20 text-base font-medium transition-colors"
+                  className="block px-4 py-2.5 text-emerald-200 hover:text-emerald-100 hover:bg-emerald-500/10 text-sm font-medium transition-colors"
                   onClick={() => setMenuOpen(false)}
                 >
                   {item.label}
                 </Link>
               ))}
-              {/* Login/Dashboard Button */}
+
+              <div className="h-px bg-linear-to-r from-transparent via-emerald-500/20 to-transparent my-2"></div>
+
               <button
-                className="block px-6 py-2 mt-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-bold shadow transition-colors"
-                onMouseDown={() => {
+                className="mx-3 px-4 py-2.5 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-lg font-semibold shadow transition-all active:scale-95"
+                onClick={() => {
                   setMenuOpen(false);
                   if (
                     typeof window !== "undefined" &&
@@ -148,54 +137,55 @@ export default function LandingHeader() {
 
       {/* Desktop Navbar */}
       <header
-        className={`
-          fixed top-0 left-0 right-0 z-110
-          items-center justify-between px-8 py-3 rounded-b-2xl shadow-lg border-b border-emerald-200/25 bg-opacity-95 backdrop-blur-md transition-all duration-300 max-w-4xl w-[95vw] mx-auto hidden md:flex opacity-100
-        `}
-        style={{ height: "4.1rem", minHeight: 52 }}
+        className="
+          fixed top-0 left-1/2 -translate-x-1/2 z-50
+          items-center justify-between px-8 py-4
+          rounded-b-2xl shadow-xl
+          border border-emerald-500/20 border-t-0
+          bg-black
+          transition-all duration-300
+          max-w-6xl w-[90vw]
+          hidden md:flex
+        "
       >
-        {BrandBar}
-        <div className="flex items-center gap-4">
-          <Link href="/" className="select-none flex items-center">
-            {/* <Image
-              src={LandingNavbarLogo}
-              alt="CTF Logo"
-              width={140}
-              height={40}
-              priority
-              className="h-10 w-auto"
-            /> */}
-          </Link>
-        </div>
-        <div className="flex items-center gap-6">
+        <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-500/50 to-transparent rounded-t-2xl"></div>
+
+        <Link href="/" className="select-none flex items-center">
+          <span className="text-2xl font-black text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-teal-300 tracking-tight">
+            CTF Arena
+          </span>
+        </Link>
+
+        <div className="flex items-center gap-8">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-emerald-100 hover:text-white text-base font-semibold px-2 py-1.5 transition-colors rounded"
+              className="text-emerald-200 hover:text-emerald-100 text-sm font-semibold transition-colors"
             >
               {item.label}
             </Link>
           ))}
-          <button
-            className="ml-4 px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg shadow transition-all"
-            onMouseDown={() => {
-              if (
-                typeof window !== "undefined" &&
-                localStorage.getItem("access")
-              ) {
-                router.push("/dashboard");
-              } else {
-                router.push("/login");
-              }
-            }}
-          >
-            {isLoggedIn ? "Dashboard" : "Login"}
-          </button>
         </div>
+
+        <button
+          className="px-6 py-2.5 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold rounded-lg shadow-lg transition-all active:scale-95"
+          onClick={() => {
+            if (
+              typeof window !== "undefined" &&
+              localStorage.getItem("access")
+            ) {
+              router.push("/dashboard");
+            } else {
+              router.push("/login");
+            }
+          }}
+        >
+          {isLoggedIn ? "Dashboard" : "Login"}
+        </button>
       </header>
-      {/* Add a spacer for fixed header */}
-      <div className="hidden md:block" style={{ height: "4.1rem" }} />
+
+      <div className="hidden md:block h-20" />
     </>
   );
 }

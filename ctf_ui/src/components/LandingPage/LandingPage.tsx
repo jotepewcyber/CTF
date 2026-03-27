@@ -1,30 +1,61 @@
-import { type FC } from "react";
-// import FeaturesSection from "./Sections/Features";
-// import Link from "next/link";
-// import WhyChooseUs from "./Sections/WhyChooseUs";
-import { Hero } from "./Sections/Hero";
-// import Landing_bg_video from "/nature4edit.mp4"
+"use client";
 
-const LandingPage: FC = () => {
+import { useEffect } from "react";
+import Galaxy from "@/components/ui-elements/Galaxy";
+import AboutUs from "./Sections/AboutUs";
+import ContactUs from "./Sections/ContactUs";
+import { Hero } from "./Sections/Hero";
+import Results from "./Sections/Results";
+
+const LandingPage = () => {
+  useEffect(() => {
+    // Prevent body scroll on Galaxy
+    document.body.style.overflow = "auto";
+  }, []);
+
   return (
-    <div className="bg-white dark:bg-theme-dark text-theme-text-dark dark:text-theme-text-light min-h-screen relative overflow-hidden">
-      {/* Video Background */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="fixed inset-0 w-full h-full object-cover z-0"
-        // src={Landing_bg_video}
-        src="/nature4edit.mp4"
-      />
-      <div className="relative z-10">
-        {/* Hero */}
-        <section className="">
+    <div className="relative w-full min-h-screen bg-black text-white overflow-hidden -mt-20">
+      {/* Galaxy Background - Fixed Once */}
+      <div className="fixed inset-0 z-0 w-screen h-screen pointer-events-none">
+        <Galaxy
+          mouseRepulsion
+          mouseInteraction
+          density={1}
+          glowIntensity={0.3}
+          saturation={0}
+          hueShift={140}
+          twinkleIntensity={0.3}
+          rotationSpeed={0.1}
+          repulsionStrength={2}
+          autoCenterRepulsion={0}
+          starSpeed={0.5}
+          speed={1}
+        />
+      </div>
+
+      {/* Dark Overlay - Optional, adjust opacity as needed */}
+      <div className="fixed inset-0 z-5 bg-black/30 pointer-events-none" />
+
+      {/* Content Wrapper - Relative, floats on top */}
+      <div className="relative z-10 w-full">
+        {/* Hero Section */}
+        <section className="relative w-full pt-20 md:pt-0">
           <Hero />
         </section>
-        <section id="why-choose-us" className="py-16">
-          {/* <WhyChooseUs /> */}
+
+        {/* About Us Section */}
+        <section className="relative w-full py-20">
+          <AboutUs />
+        </section>
+
+        {/* Contact Us Section */}
+        <section className="relative w-full py-20">
+          <ContactUs />
+        </section>
+
+        {/* Results Section */}
+        <section className="relative w-full py-20">
+          <Results />
         </section>
       </div>
     </div>

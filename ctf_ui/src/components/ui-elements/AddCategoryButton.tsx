@@ -1,3 +1,7 @@
+"use client";
+
+import { Plus } from "lucide-react";
+
 export default function AddCategoryButton({
   isAdmin,
   onClick,
@@ -6,21 +10,14 @@ export default function AddCategoryButton({
   onClick?: () => void;
 }) {
   if (!isAdmin) return null;
+
   return (
     <button
-      style={{
-        background: "#2f3dec",
-        color: "#fff",
-        borderRadius: 6,
-        padding: "8px 16px",
-        border: "none",
-        cursor: "pointer",
-        fontWeight: 600,
-        fontSize: 15,
-      }}
       onClick={onClick}
+      className="flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold hover:shadow-lg hover:shadow-emerald-500/50 transition-all duration-200 active:scale-95"
     >
-      + Add Category
+      <Plus size={18} />
+      Add Category
     </button>
   );
 }
