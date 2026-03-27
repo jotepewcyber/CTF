@@ -10,12 +10,11 @@ export default function LandingLayout({
 }) {
   return (
     <>
-      <main className="w-full min-h-screen ">
-        <LandingHeader />
-        <ReduxProvider>{children}</ReduxProvider>
-        {/* Footer */}
-        <LandingFooter />
-      </main>
+      <LandingHeader />
+      <ReduxProvider>
+        <div className="relative w-full bg-black text-white">{children}</div>
+      </ReduxProvider>
+      <LandingFooter />
     </>
   );
 }

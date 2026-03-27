@@ -1,6 +1,8 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
 
 import type { RootState, AppDispatch } from "@/store";
 import {
@@ -9,11 +11,16 @@ import {
   createCompetitionThunk,
   deleteCompetitionThunk,
 } from "@/store/features/Competition/competitionThunks";
-import CompetitionTimer from "@/components/Competition/CompetitionTimer";
 import { fetchMeThunk } from "@/store/features/Auth/authThunks";
-import { useRouter } from "next/navigation";
 
-export default function CompetitionPage() {
+import CompetitionForm from "@/components/Competition/CompetitionForm";
+import DeleteConfirmation from "@/components/Competition/DeleteConfirmation";
+import CompetitionInfo from "@/components/Competition/CompetitionInfo";
+import CompetitionTimer from "@/components/Competition/CompetitionTimer";
+import { Play, Edit, Trash2, Plus } from "lucide-react";
+import Lights from "@/components/Dashboard/dashboard";
+
+export default function DashboardPage() {
   const dispatch = useDispatch<AppDispatch>();
   const info = useSelector((state: RootState) => state.competition.info);
   const loading = useSelector((state: RootState) => state.competition.loading);
@@ -21,464 +28,252 @@ export default function CompetitionPage() {
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === "admin";
 
-  const [editMode, setEditMode] = useState(false);
-  const [createMode, setCreateMode] = useState(false);
+  const [formMode, setFormMode] = useState<"create" | "edit" | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [form, setForm] = useState<any>(null);
-  const [createForm, setCreateForm] = useState({
-    name: "CTF 1",
-    start_time: "2026-04-01T09:00:00Z",
-    end_time: "2026-04-01T17:00:00Z",
-    is_active: true,
-  });
-  const router = useRouter();
   const [now, setNow] = useState(new Date());
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     dispatch(fetchMeThunk());
     dispatch(fetchCompetitionInfoThunk());
   }, [dispatch]);
 
+  // Update current time every second for live countdown
   useEffect(() => {
-    if (info) setForm(info);
-  }, [info]);
-
-  useEffect(() => {
-    const interval = setInterval(() => setNow(new Date()), 1000);
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const handleEdit = () => {
-    setEditMode(true);
-    setForm(info);
-  };
-  const handleCancel = () => setEditMode(false);
-  const handleCreateCancel = () => setCreateMode(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((f: any) => ({ ...f, [e.target.name]: e.target.value }));
-  };
-
-  const handleCreateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setCreateForm((f: any) => ({
-      ...f,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  function toDatetimeLocal(dt: string) {
-    if (!dt) return "";
-    const date = new Date(dt);
-    if (isNaN(date.getTime())) return "";
-    const tzOffset = date.getTimezoneOffset() * 60000;
-    const localISOTime = new Date(date.getTime() - tzOffset)
-      .toISOString()
-      .slice(0, 16);
-    return localISOTime;
-  }
-
-  function fromDatetimeLocal(localValue: string) {
-    if (!localValue) return "";
-    const localDate = new Date(localValue);
-    return localDate.toISOString();
-  }
-
-  const handleSave = async () => {
-    const payload = {
-      ...form,
-      start_time: fromDatetimeLocal(form.start_time),
-      end_time: fromDatetimeLocal(form.end_time),
-    };
-    await dispatch(updateCompetitionThunk({ id: info.id, data: payload }));
-    setEditMode(false);
+  const handleCreateSubmit = async (payload: any) => {
+    await dispatch(createCompetitionThunk(payload));
+    setFormMode(null);
     dispatch(fetchCompetitionInfoThunk());
   };
 
-  const handleCreate = async () => {
-    const payload = {
-      ...createForm,
-      start_time: fromDatetimeLocal(createForm.start_time),
-      end_time: fromDatetimeLocal(createForm.end_time),
-    };
-    await dispatch(createCompetitionThunk(payload));
-    setCreateMode(false);
+  const handleEditSubmit = async (payload: any) => {
+    await dispatch(updateCompetitionThunk({ id: info.id, data: payload }));
+    setFormMode(null);
     dispatch(fetchCompetitionInfoThunk());
   };
 
   const handleDelete = async () => {
-    await dispatch(deleteCompetitionThunk(info.id));
-    setShowDeleteConfirm(false);
-    dispatch(fetchCompetitionInfoThunk());
+    setDeleteLoading(true);
+    try {
+      await dispatch(deleteCompetitionThunk(info.id));
+      setShowDeleteConfirm(false);
+      dispatch(fetchCompetitionInfoThunk());
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
-  if (loading) return <div>Loading competition info...</div>;
-  if (error || !info)
+  if (loading) {
     return (
-      <div style={{ margin: "40px auto", maxWidth: 600 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: "20px",
-          }}
-        >
-          {isAdmin && (
-            <button
-              onClick={() => setCreateMode(true)}
-              style={{
-                padding: "10px 28px",
-                fontSize: "1rem",
-                fontWeight: 500,
-                background: "#22c55e",
-                color: "#fff",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-              }}
-            >
-              Create Competition
-            </button>
-          )}
-        </div>
-
-        {createMode && (
-          <form
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 14,
-              background: "#fafbff",
-              padding: 22,
-              borderRadius: 7,
-            }}
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleCreate();
-            }}
-          >
-            <h2>Create New Competition</h2>
-            <label>
-              Name:
-              <input
-                name="name"
-                type="text"
-                value={createForm.name}
-                onChange={handleCreateChange}
-                required
-              />
-            </label>
-            <label>
-              Start Time:
-              <input
-                name="start_time"
-                type="datetime-local"
-                value={toDatetimeLocal(createForm.start_time)}
-                onChange={handleCreateChange}
-                required
-              />
-            </label>
-            <label>
-              End Time:
-              <input
-                name="end_time"
-                type="datetime-local"
-                value={toDatetimeLocal(createForm.end_time)}
-                onChange={handleCreateChange}
-                required
-              />
-            </label>
-            <label>
-              Active:
-              <input
-                type="checkbox"
-                name="is_active"
-                checked={createForm.is_active}
-                onChange={handleCreateChange}
-              />
-            </label>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button type="submit">Create</button>
-              <button type="button" onClick={handleCreateCancel}>
-                Cancel
-              </button>
-            </div>
-          </form>
-        )}
-
-        <div style={{ color: "red" }}>
-          {error || "No active competition found"}
+      <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/50">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin mx-auto"></div>
+          <p className="text-emerald-200 mt-4 font-semibold">
+            Loading competition...
+          </p>
         </div>
       </div>
     );
+  }
+
+  if (error || !info) {
+    return (
+      <div className="relative w-full min-h-screen pt-15 md:pt-0">
+        <Lights />
+        <div className="relative z-40 w-full">
+          {/* Top Section - Create Button */}
+          <div className="px-6 md:px-12 py-6 border-b border-emerald-500/10 md:mt-4 md:rounded-xl md:mx-6 md:border">
+            <div className="flex justify-between items-center">
+              <h1 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-teal-300">
+                Dashboard
+              </h1>
+              {isAdmin && (
+                <button
+                  onClick={() => setFormMode("create")}
+                  className="flex items-center gap-2 px-6 py-3 rounded-lg bg-linear-to-r from-emerald-500 to-teal-500 text-white font-semibold hover:shadow-lg hover:shadow-emerald-500/50 transition-all duration-200 active:scale-95"
+                >
+                  <Plus size={20} />
+                  New Competition
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Error Message */}
+          <div className="px-6 md:px-12 py-12">
+            <div className="max-w-3xl mx-auto p-8 rounded-xl bg-red-500/10 border border-red-500/30 backdrop-blur-sm">
+              <p className="text-red-300 text-center font-medium text-lg">
+                {error || "No competition found. Create one to get started!"}
+              </p>
+            </div>
+          </div>
+
+          {formMode && (
+            <CompetitionForm
+              mode={formMode}
+              onSubmit={handleCreateSubmit}
+              onCancel={() => setFormMode(null)}
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const compStart = new Date(info.start_time);
   const compEnd = new Date(info.end_time);
   const isRunning = now >= compStart && now <= compEnd;
 
   return (
-    <div style={{ margin: "40px auto", maxWidth: 600 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginBottom: "20px",
-        }}
-      >
-        {isAdmin && (
-          <button
-            onClick={() => setCreateMode(true)}
-            style={{
-              padding: "10px 28px",
-              fontSize: "1rem",
-              fontWeight: 500,
-              background: "#22c55e",
-              color: "#fff",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
-          >
-            Create Competition
-          </button>
+    <div className="relative w-full min-h-screen pt-15 md:pt-0">
+      <Lights />
+      <div className="relative z-40 w-full">
+        {/* Header Section with Actions */}
+        <div className="px-6 md:px-12 py-6 md:py-8 md:mt-4 md:mx-6 md:rounded-xl border-b md:border border-emerald-500/10 bg-linear-to-r from-slate-900/50 via-slate-900/30 to-slate-900/50 backdrop-blur-sm">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-teal-300">
+                Dashboard
+              </h1>
+              <div className="h-1 w-24 bg-linear-to-r from-emerald-400 to-teal-300 rounded-full mt-2"></div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-3 w-full md:w-auto">
+              {isRunning && (
+                <button
+                  onClick={() => router.push("/challenges")}
+                  className="flex items-center gap-2 px-6 py-3 rounded-lg bg-linear-to-r from-emerald-500 to-teal-500 text-white font-semibold hover:shadow-lg hover:shadow-emerald-500/50 transition-all duration-200 active:scale-95 flex-1 md:flex-none justify-center md:justify-start"
+                >
+                  <Play size={18} />
+                  Start Competition
+                </button>
+              )}
+
+              {isAdmin && (
+                <>
+                  <button
+                    onClick={() => setFormMode("edit")}
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg bg-blue-500/10 text-blue-300 border border-blue-500/30 hover:border-blue-500/50 hover:bg-blue-500/20 font-semibold transition-all duration-200 active:scale-95 flex-1 md:flex-none justify-center"
+                  >
+                    <Edit size={18} />
+                    <span className="hidden sm:inline">Edit</span>
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 text-red-300 border border-red-500/30 hover:border-red-500/50 hover:bg-red-500/20 font-semibold transition-all duration-200 active:scale-95 flex-1 md:flex-none justify-center"
+                  >
+                    <Trash2 size={18} />
+                    <span className="hidden sm:inline">Delete</span>
+                  </button>
+                </>
+              )}
+
+              {isAdmin && !isRunning && (
+                <button
+                  onClick={() => setFormMode("create")}
+                  className="flex items-center gap-2 px-6 py-3 rounded-lg bg-linear-to-r from-emerald-500 to-teal-500 text-white font-semibold hover:shadow-lg hover:shadow-emerald-500/50 transition-all duration-200 active:scale-95 flex-1 md:flex-none justify-center md:justify-start"
+                >
+                  <Plus size={18} />
+                  New Competition
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Section */}
+        <div className="px-6 md:px-12 py-8 md:py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Competition Info & Timer */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Competition Info */}
+              <CompetitionInfo
+                name={info.name}
+                startTime={info.start_time}
+                endTime={info.end_time}
+                isActive={info.is_active}
+                isRunning={isRunning}
+              />
+
+              {/* Timer - Pass live client time instead of server time */}
+              <CompetitionTimer
+                start={info.start_time}
+                end={info.end_time}
+                now={now}
+              />
+            </div>
+
+            {/* Right Column - Quick Stats (Optional) */}
+            <div className="lg:col-span-1">
+              <div className="p-6 rounded-xl bg-linear-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 backdrop-blur-sm space-y-4">
+                <h3 className="text-lg font-semibold text-emerald-300">
+                  Competition Status
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-emerald-200/70">Status:</span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        isRunning
+                          ? "bg-blue-500/20 text-blue-300"
+                          : info.is_active
+                            ? "bg-emerald-500/20 text-emerald-300"
+                            : "bg-slate-500/20 text-slate-300"
+                      }`}
+                    >
+                      {isRunning
+                        ? "Running"
+                        : info.is_active
+                          ? "Active"
+                          : "Inactive"}
+                    </span>
+                  </div>
+                  <div className="h-px bg-linear-to-r from-transparent via-emerald-500/20 to-transparent"></div>
+                  <div className="text-xs text-emerald-200/60">
+                    <p>
+                      Competition runs from your configured start to end time.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Forms/Modals */}
+        {formMode === "create" && (
+          <CompetitionForm
+            mode="create"
+            onSubmit={handleCreateSubmit}
+            onCancel={() => setFormMode(null)}
+          />
+        )}
+
+        {formMode === "edit" && (
+          <CompetitionForm
+            mode="edit"
+            initialData={info}
+            onSubmit={handleEditSubmit}
+            onCancel={() => setFormMode(null)}
+          />
+        )}
+
+        {showDeleteConfirm && (
+          <DeleteConfirmation
+            onConfirm={handleDelete}
+            onCancel={() => setShowDeleteConfirm(false)}
+            loading={deleteLoading}
+          />
         )}
       </div>
-
-      {createMode && (
-        <form
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 14,
-            background: "#fafbff",
-            padding: 22,
-            borderRadius: 7,
-            marginBottom: 22,
-          }}
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleCreate();
-          }}
-        >
-          <h2>Create New Competition</h2>
-          <label>
-            Name:
-            <input
-              name="name"
-              type="text"
-              value={createForm.name}
-              onChange={handleCreateChange}
-              required
-            />
-          </label>
-          <label>
-            Start Time:
-            <input
-              name="start_time"
-              type="datetime-local"
-              value={toDatetimeLocal(createForm.start_time)}
-              onChange={handleCreateChange}
-              required
-            />
-          </label>
-          <label>
-            End Time:
-            <input
-              name="end_time"
-              type="datetime-local"
-              value={toDatetimeLocal(createForm.end_time)}
-              onChange={handleCreateChange}
-              required
-            />
-          </label>
-          <label>
-            Active:
-            <input
-              type="checkbox"
-              name="is_active"
-              checked={createForm.is_active}
-              onChange={handleCreateChange}
-            />
-          </label>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button type="submit">Create</button>
-            <button type="button" onClick={handleCreateCancel}>
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
-
-      {showDeleteConfirm && (
-        <div
-          style={{
-            background: "#ffebee",
-            border: "2px solid #f44336",
-            padding: 20,
-            borderRadius: 7,
-            marginBottom: 22,
-          }}
-        >
-          <h3 style={{ color: "#f44336", marginTop: 0 }}>Confirm Delete?</h3>
-          <p>Are you sure you want to delete this competition?</p>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button
-              onClick={handleDelete}
-              style={{
-                padding: "8px 16px",
-                background: "#f44336",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              Yes, Delete
-            </button>
-            <button
-              onClick={() => setShowDeleteConfirm(false)}
-              style={{
-                padding: "8px 16px",
-                background: "#ccc",
-                color: "#000",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      <h1>{info.name}</h1>
-      <CompetitionTimer
-        start={info.start_time}
-        end={info.end_time}
-        now={info.now}
-      />
-      <div>Start: {new Date(info.start_time).toLocaleString()}</div>
-      <div>End: {new Date(info.end_time).toLocaleString()}</div>
-      <div>Status: {info.is_active ? "Active" : "Inactive"}</div>
-
-      {isRunning && (
-        <button
-          onClick={() => router.push("/challenges")}
-          style={{
-            margin: "20px 0 16px 0",
-            padding: "10px 28px",
-            fontSize: "1.2rem",
-            fontWeight: 500,
-            background: "#22c55e",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            letterSpacing: "0.04em",
-          }}
-        >
-          Start
-        </button>
-      )}
-
-      {isAdmin && !editMode && (
-        <div style={{ display: "flex", gap: 8, marginTop: 22 }}>
-          <button
-            onClick={handleEdit}
-            style={{
-              padding: "10px 28px",
-              fontSize: "1rem",
-              fontWeight: 500,
-              background: "#2196F3",
-              color: "#fff",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
-          >
-            Edit Competition
-          </button>
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            style={{
-              padding: "10px 28px",
-              fontSize: "1rem",
-              fontWeight: 500,
-              background: "#f44336",
-              color: "#fff",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
-          >
-            Delete Competition
-          </button>
-        </div>
-      )}
-
-      {isAdmin && editMode && (
-        <form
-          style={{
-            marginTop: 22,
-            display: "flex",
-            flexDirection: "column",
-            gap: 14,
-            background: "#fafbff",
-            padding: 22,
-            borderRadius: 7,
-          }}
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSave();
-          }}
-        >
-          <label>
-            Name:
-            <input
-              name="name"
-              type="text"
-              value={form?.name || ""}
-              onChange={handleChange}
-            />
-          </label>
-          <label>
-            Start Time:
-            <input
-              name="start_time"
-              type="datetime-local"
-              value={form ? toDatetimeLocal(form.start_time) : ""}
-              onChange={handleChange}
-            />
-          </label>
-          <label>
-            End Time:
-            <input
-              name="end_time"
-              type="datetime-local"
-              value={form ? toDatetimeLocal(form.end_time) : ""}
-              onChange={handleChange}
-            />
-          </label>
-          <label>
-            Active:
-            <input
-              type="checkbox"
-              name="is_active"
-              checked={!!form?.is_active}
-              onChange={(e) =>
-                setForm((f: any) => ({ ...f, is_active: e.target.checked }))
-              }
-            />
-          </label>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button type="submit">Save</button>
-            <button type="button" onClick={handleCancel}>
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
     </div>
   );
 }

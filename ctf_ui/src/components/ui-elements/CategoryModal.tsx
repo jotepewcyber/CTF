@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { X } from "lucide-react";
 
 export default function CategoryModal({
   open,
@@ -13,41 +16,19 @@ export default function CategoryModal({
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.3)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        style={{
-          background: "#fff",
-          padding: 32,
-          borderRadius: 8,
-          minWidth: 320,
-          position: "relative",
-        }}
+        className="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border border-emerald-500/30 rounded-2xl shadow-2xl w-full max-w-md p-8 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          style={{
-            position: "absolute",
-            top: 8,
-            right: 12,
-            background: "none",
-            border: "none",
-            fontSize: 24,
-            cursor: "pointer",
-          }}
+          className="absolute top-4 right-4 p-2 hover:bg-emerald-500/10 rounded-lg transition-colors"
           onClick={onClose}
           aria-label="Close"
         >
-          &times;
+          <X size={20} className="text-emerald-400" />
         </button>
         {children}
       </div>
