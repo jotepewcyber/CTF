@@ -11,14 +11,42 @@ export const getCategories = () => api.get("challenges/categories/");
 export const createCategory = (data: { name: string }) =>
   api.post("challenges/categories/", data);
 console.log("API Client loaded", { getCategories, createCategory });
+export const updateCategory = (categoryId: number, data: { name: string }) => {
+  return api.put(`challenges/categories/${categoryId}/edit/`, data);
+};
+export const deleteCategory = (categoryId: number) => {
+  return api.delete(`challenges/categories/${categoryId}/edit/`);
+};
 
-// CHALLENGE
+// QuUESTIONS
 export const getQuestionsByCategory = (categoryId: number) =>
   api.get(`challenges/categories/${categoryId}/questions/`);
 export const createQuestions = (data: any) =>
   api.post("challenges/questions/create/", data);
 export const getQuestionDetail = (challengeId: number) =>
-  api.get(`challenges/questions/${challengeId}/`);
+  api.get(`challenges/questions/${challengeId}/get/`);
+// Update challenge
+export const updateQuestion = (challengeId: number, data: any) => {
+  return api.put(`challenges/questions/${challengeId}/edit/`, data);
+};
+
+// Delete challenge
+export const deleteQuestion = (challengeId: number) => {
+  return api.delete(`challenges/questions/${challengeId}/edit/`);
+};
+export const uploadChallengeFiles = (challengeId: number, files: File[]) => {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append("files", file);
+  });
+  return api.post(
+    `challenges/questions/${challengeId}/attachments/`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    },
+  );
+};
 
 // SOLVE
 export const submitFlag = (challengeId: number, flag: string) =>

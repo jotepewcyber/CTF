@@ -20,7 +20,7 @@ export default function CategoryModal({
       onClick={onClose}
     >
       <div
-        className="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border border-emerald-500/30 rounded-2xl shadow-2xl w-full max-w-md p-8 relative"
+        className="bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 border border-emerald-500/30 rounded-2xl shadow-2xl w-full max-w-md p-8 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button

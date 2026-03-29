@@ -7,10 +7,11 @@ import AddCategoryButton from "@/components/ui-elements/AddCategoryButton";
 import ChallengeCategory from "@/components/Challenges/ChallengeCategory";
 import CategoryModal from "@/components/ui-elements/CategoryModal";
 import AddCategoryForm from "@/components/Challenges/AddCategoryForm";
+import EditCategoryForm from "@/components/Challenges/EditCategoryForm";
 import { fetchMeThunk } from "@/store/features/Auth/authThunks";
 import { fetchCompetitionInfoThunk } from "@/store/features/Competition/competitionThunks";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Loader } from "lucide-react";
+import { AlertCircle, Loader, Edit2 } from "lucide-react";
 import Lights from "@/components/Dashboard/dashboard";
 
 export default function ChallengesPage() {
@@ -23,6 +24,11 @@ export default function ChallengesPage() {
   const isAdmin = user?.role === "admin";
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
   const router = useRouter();
   const competition = useSelector((state: RootState) => state.competition.info);
   const competitionLoading = useSelector(
@@ -48,6 +54,11 @@ export default function ChallengesPage() {
       }
     }
   }, [competition, competitionLoading, router]);
+
+  const handleEditCategory = (category: { id: number; name: string }) => {
+    setSelectedCategory(category);
+    setEditModalOpen(true);
+  };
 
   if (competitionLoading || !competition) {
     return (
@@ -85,9 +96,23 @@ export default function ChallengesPage() {
           </div>
         </div>
 
-        {/* Modal */}
+        {/* Add Category Modal */}
         <CategoryModal open={modalOpen} onClose={() => setModalOpen(false)}>
           <AddCategoryForm onSuccess={() => setModalOpen(false)} />
+        </CategoryModal>
+
+        {/* Edit Category Modal */}
+        <CategoryModal
+          open={editModalOpen}
+          onClose={() => {
+            setEditModalOpen(false);
+            setSelectedCategory(null);
+          }}
+        >
+          <EditCategoryForm
+            onSuccess={() => setEditModalOpen(false)}
+            category={selectedCategory}
+          />
         </CategoryModal>
 
         {/* Categories Section */}
@@ -110,12 +135,22 @@ export default function ChallengesPage() {
           ) : (
             <div className="space-y-6 max-w-4xl mx-auto">
               {categories.map((cat: any, idx: number) => (
-                <ChallengeCategory
-                  key={cat.id}
-                  category={cat}
-                  idx={idx}
-                  isAdmin={isAdmin}
-                />
+                <div key={cat.id} className="group relative">
+                  <ChallengeCategory
+                    category={cat}
+                    idx={idx}
+                    isAdmin={isAdmin}
+                  />
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleEditCategory(cat)}
+                      className="absolute top-4 right-16 p-2 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300"
+                      title="Edit Category"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
           )}

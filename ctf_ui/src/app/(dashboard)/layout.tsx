@@ -4,7 +4,6 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import Header from "@/components/Header/header";
 import ReduxProvider from "@/providers/ReduxProvider";
 import AuthGuard from "@/components/AuthGuard";
-// import AuthGuard from "@/components/AuthGuard";
 
 export default function DashboardLayout({
   children,
@@ -19,15 +18,16 @@ export default function DashboardLayout({
     <div className="min-h-screen w-full relative overflow-x-hidden">
       {/* Radial Emerald Glow Background */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none fixed inset-0 z-0"
         style={{
           backgroundImage:
             "radial-gradient(circle 500px at 50% 300px, rgba(16,185,129,0.35), transparent)",
         }}
         aria-hidden="true"
       />
+
       {/* Layout Content (z-10 to render ABOVE background) */}
-      <div className="relative">
+      <div className="relative z-10">
         <Sidebar
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
@@ -36,16 +36,15 @@ export default function DashboardLayout({
         />
 
         <div
-          className={`transition-all duration-300 ${sidebarPlClass}
-                h-screen overflow-y-auto`}
+          className={`transition-all duration-300 ${sidebarPlClass} h-screen overflow-y-auto`}
         >
-          {/* floating header */}
-          <div className="sticky top-0 z-50">
+          {/* Floating header */}
+          <div className="sticky top-0 z-40">
             <Header onSidebarToggle={() => setSidebarOpen((o) => !o)} />
           </div>
 
-          {/* page content */}
-          <div className="pt-6">
+          {/* Page content */}
+          <div className="pt-6 px-6 md:px-8">
             <ReduxProvider>
               <AuthGuard>{children}</AuthGuard>
             </ReduxProvider>
