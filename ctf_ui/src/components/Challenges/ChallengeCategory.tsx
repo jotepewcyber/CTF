@@ -5,7 +5,11 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "@/store";
 import ChallengeCard from "./ChallengeCard";
 import AddQuestionModal from "./AddQuestionModal";
-import { fetchChallengesByCategoryThunk } from "@/store/features/Question/questionThunks";
+import EditChallengeModal from "./EditChallengeModal";
+import {
+  fetchChallengesByCategoryThunk,
+  deleteChallengeThunk,
+} from "@/store/features/Question/questionThunks";
 import ChallengeDetailModal from "./Questions/ChallengeDetailModal";
 import { ChevronDown, Plus, AlertCircle } from "lucide-react";
 
@@ -14,6 +18,12 @@ type Challenge = {
   name: string;
   level: string;
   points: number;
+  description: string;
+  hint?: string;
+  url?: string;
+  flag: string;
+  category: number;
+  attachments?: any[];
 };
 
 type Props = {
@@ -29,7 +39,14 @@ export default function ChallengeCategory({ category, idx, isAdmin }: Props) {
   const [open, setOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedChallengeId, setSelectedChallengeId] = useState<number | null>(
+    null,
+  );
+  const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(
+    null,
+  );
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(
     null,
   );
 
@@ -51,6 +68,24 @@ export default function ChallengeCategory({ category, idx, isAdmin }: Props) {
       dispatch(fetchChallengesByCategoryThunk(category.id));
     }
   }, [open, category.id, loading, loaded, dispatch]);
+
+  const handleEdit = (challengeId: number) => {
+    const challenge = challenges.find((c) => c.id === challengeId);
+    if (challenge) {
+      setSelectedChallenge(challenge);
+      setEditModalOpen(true);
+    }
+  };
+
+  const handleDelete = async (challengeId: number) => {
+    try {
+      await dispatch(deleteChallengeThunk(challengeId)).unwrap();
+      dispatch(fetchChallengesByCategoryThunk(category.id));
+      setShowDeleteConfirm(null);
+    } catch (err) {
+      console.error("Failed to delete challenge:", err);
+    }
+  };
 
   return (
     <div className="rounded-xl bg-linear-to-br from-slate-900/50 to-slate-800/50 border border-emerald-500/20 overflow-hidden hover:border-emerald-500/40 transition-all duration-200">
@@ -101,6 +136,17 @@ export default function ChallengeCategory({ category, idx, isAdmin }: Props) {
         categoryId={category.id}
       />
 
+      {/* Edit Challenge Modal */}
+      <EditChallengeModal
+        open={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedChallenge(null);
+        }}
+        challenge={selectedChallenge}
+        categoryId={category.id}
+      />
+
       {/* Category Content */}
       {open && (
         <div className="px-6 py-6 border-t border-emerald-500/10 bg-slate-900/30">
@@ -133,16 +179,44 @@ export default function ChallengeCategory({ category, idx, isAdmin }: Props) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {challenges.map((c: Challenge) => (
-                <ChallengeCard
-                  key={c.id}
-                  name={c.name}
-                  level={c.level}
-                  points={c.points}
-                  onClick={() => {
-                    setSelectedChallengeId(c.id);
-                    setDetailModalOpen(true);
-                  }}
-                />
+                <div key={c.id} className="relative">
+                  <ChallengeCard
+                    id={c.id}
+                    name={c.name}
+                    level={c.level}
+                    points={c.points}
+                    isAdmin={isAdmin}
+                    onClick={() => {
+                      setSelectedChallengeId(c.id);
+                      setDetailModalOpen(true);
+                    }}
+                    onEdit={handleEdit}
+                    onDelete={(id) => setShowDeleteConfirm(id)}
+                  />
+
+                  {/* Delete Confirmation */}
+                  {showDeleteConfirm === c.id && (
+                    <div className="absolute inset-0 rounded-lg bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 z-10">
+                      <p className="text-white text-sm font-semibold">
+                        Delete this challenge?
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleDelete(c.id)}
+                          className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white text-xs font-semibold transition-colors"
+                        >
+                          Yes
+                        </button>
+                        <button
+                          onClick={() => setShowDeleteConfirm(null)}
+                          className="px-4 py-2 rounded bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold transition-colors"
+                        >
+                          No
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           )}

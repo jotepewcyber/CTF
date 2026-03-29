@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from .models import Category, Challenge, ChallengeSolve
+from .models import Category, Challenge, ChallengeSolve, ChallengeAttachment
 from django.db.models import Sum, F
 from .serializers import (
     CategorySerializer, ChallengeCardSerializer,
@@ -11,6 +11,8 @@ from django.shortcuts import get_object_or_404
 from .permissions import IsAdminRole
 from competition.utils import is_competition_running
 from competition.utils import get_active_competition
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import status
 
 
 # --- CATEGORY VIEWS ---
@@ -29,6 +31,32 @@ class CategoryListCreateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+
+
+
+class CategoryDetailAPIView(APIView):
+    permission_classes = [IsAdminRole]  # Only admin can edit/delete
+
+    def put(self, request, pk):
+        category = get_object_or_404(Category, pk=pk)
+        serializer = CategorySerializer(category, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        category = get_object_or_404(Category, pk=pk)
+        serializer = CategorySerializer(category, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        category = get_object_or_404(Category, pk=pk)
+        category.delete()
+        return Response({'detail': 'Category deleted.'}, status=status.HTTP_204_NO_CONTENT)
 
 # --- CHALLENGE VIEWS ---
 
@@ -50,6 +78,67 @@ class ChallengeCreateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+
+class ChallengeEditDeleteAPIView(APIView):
+    permission_classes = [IsAdminRole]
+
+    def put(self, request, pk):
+        challenge = get_object_or_404(Challenge, pk=pk)
+        serializer = ChallengeCreateSerializer(challenge, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        challenge = get_object_or_404(Challenge, pk=pk)
+        serializer = ChallengeCreateSerializer(challenge, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        challenge = get_object_or_404(Challenge, pk=pk)
+        challenge.delete()
+        return Response({'detail': 'Challenge deleted.'}, status=status.HTTP_204_NO_CONTENT)
+    
+class ChallengeAttachmentUploadAPIView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request, pk):
+        files = request.FILES.getlist('files')
+        if not files:
+            return Response({'detail': 'No files uploaded.'}, status=400)
+        try:
+            challenge = Challenge.objects.get(pk=pk)
+        except Challenge.DoesNotExist:
+            return Response({'detail': 'Challenge not found.'}, status=404)
+
+        duplicated = []
+        uploaded = []
+
+        for f in files:
+            # Check if this file name already exists for the challenge:
+            if ChallengeAttachment.objects.filter(challenge=challenge, filename=f.name).exists():
+                duplicated.append(f.name)
+                continue
+            ChallengeAttachment.objects.create(challenge=challenge, file=f, filename=f.name)
+            uploaded.append(f.name)
+
+        if duplicated and not uploaded:
+            return Response(
+                {'detail': f'Duplicate file(s) not uploaded: {", ".join(duplicated)}'}, 
+                status=400
+            )
+        elif duplicated:
+            return Response(
+                {'detail': f'Some files uploaded, duplicates skipped: {", ".join(duplicated)}'},
+                status=200
+            )
+        else:
+            return Response({'detail': 'Files uploaded!'}, status=201)
+
 
 class ChallengeDetailAPIView(APIView):
     permission_classes = [permissions.AllowAny]

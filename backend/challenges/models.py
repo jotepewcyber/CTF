@@ -21,6 +21,16 @@ class Challenge(models.Model):
     def __str__(self):
         return self.name
 
+class ChallengeAttachment(models.Model):
+    challenge = models.ForeignKey(Challenge, related_name='attachments', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='challenge_files/')
+    filename = models.CharField(max_length=255) 
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['challenge', 'filename'], name='unique_file_name_per_challenge')
+        ]
+
 class ChallengeSolve(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     challenge = models.ForeignKey(Challenge, related_name='solves', on_delete=models.CASCADE)

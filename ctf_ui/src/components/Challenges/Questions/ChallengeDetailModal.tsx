@@ -11,7 +11,15 @@ import {
   clearCurrentChallenge,
   clearSubmissionResult,
 } from "@/store/features/Question/questionSlice";
-import { X, Trophy, Lock, Link2, CheckCircle, XCircle } from "lucide-react";
+import {
+  X,
+  Trophy,
+  Lock,
+  Link2,
+  CheckCircle,
+  XCircle,
+  File,
+} from "lucide-react";
 
 export default function ChallengeDetailModal({
   open,
@@ -76,8 +84,8 @@ export default function ChallengeDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 border border-emerald-500/30 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm pt-20">
+      <div className="bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 border border-emerald-500/30 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[calc(100vh-120px)] overflow-y-auto relative">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -93,7 +101,7 @@ export default function ChallengeDetailModal({
             <p className="text-emerald-200 mt-4">Loading challenge...</p>
           </div>
         ) : (
-          <div className="p-8 space-y-6">
+          <div className="p-6 space-y-5">
             {/* Header */}
             <div>
               <div className="flex items-start justify-between gap-4 mb-3">
@@ -132,50 +140,76 @@ export default function ChallengeDetailModal({
             <div className="space-y-4">
               {/* Description */}
               <div>
-                <h3 className="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">
+                <h3 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">
                   Description
                 </h3>
-                <p className="text-emerald-100/80 leading-relaxed">
+                <p className="text-emerald-100/80 leading-relaxed text-sm">
                   {challenge.description}
                 </p>
               </div>
 
-              {/* Hint */}
-              {challenge.hint && (
-                <div>
-                  <h3 className="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">
-                    Hint
-                  </h3>
-                  <p className="text-emerald-100/80 italic border-l-2 border-emerald-500/30 pl-3">
-                    {challenge.hint}
-                  </p>
-                </div>
-              )}
+              {/* Hint & URL Row */}
+              <div className="grid grid-cols-2 gap-4">
+                {challenge.hint && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">
+                      Hint
+                    </h3>
+                    <p className="text-emerald-100/80 italic border-l-2 border-emerald-500/30 pl-3 text-sm">
+                      {challenge.hint}
+                    </p>
+                  </div>
+                )}
 
-              {/* URL */}
-              {challenge.url && (
+                {challenge.url && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">
+                      Challenge URL
+                    </h3>
+                    <a
+                      href={challenge.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-300 hover:text-emerald-200 transition-colors group text-sm"
+                    >
+                      <Link2 size={14} />
+                      <span className="underline group-hover:no-underline truncate">
+                        Open Challenge
+                      </span>
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {/* Attachments */}
+              {challenge.attachments && challenge.attachments.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">
-                    Challenge URL
+                  <h3 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">
+                    Attachments
                   </h3>
-                  <a
-                    href={challenge.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-300 hover:text-emerald-200 transition-colors group"
-                  >
-                    <Link2 size={16} />
-                    <span className="underline group-hover:no-underline">
-                      Open Challenge
-                    </span>
-                  </a>
+                  <div className="space-y-1 max-h-24 overflow-y-auto">
+                    {challenge.attachments.map((attachment: any) => (
+                      <a
+                        key={attachment.id}
+                        href={attachment.file}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-300 hover:text-emerald-200 transition-colors group text-sm"
+                      >
+                        <File size={14} />
+                        <span className="underline group-hover:no-underline truncate">
+                          {attachment.filename || "Download"}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               )}
 
               {/* Solved Count */}
               {typeof challenge.solved_count !== "undefined" && (
                 <div className="p-3 rounded-lg bg-slate-800/30 border border-emerald-500/10">
-                  <p className="text-sm text-emerald-200/70">
+                  <p className="text-xs text-emerald-200/70">
                     <span className="font-semibold">Solved by:</span>{" "}
                     <span className="text-emerald-400 font-bold">
                       {challenge.solved_count}
@@ -190,12 +224,12 @@ export default function ChallengeDetailModal({
             <div className="h-px bg-linear-to-r from-transparent via-emerald-500/20 to-transparent"></div>
 
             {/* Flag Submission */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">
                   Submit Flag
                 </label>
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex gap-3">
                   <input
                     type="text"
                     placeholder="flag{...}"
@@ -203,16 +237,16 @@ export default function ChallengeDetailModal({
                     onChange={(e) => setFlag(e.target.value)}
                     required
                     disabled={submitting}
-                    className="flex-1 px-4 py-2.5 rounded-lg bg-slate-800/50 border border-emerald-500/20 text-emerald-100 placeholder-emerald-400/30 focus:border-emerald-500/50 focus:outline-none transition-colors font-mono disabled:opacity-50"
+                    className="flex-1 px-3 py-2 rounded-lg bg-slate-800/50 border border-emerald-500/20 text-emerald-100 placeholder-emerald-400/30 focus:border-emerald-500/50 focus:outline-none transition-colors font-mono disabled:opacity-50 text-sm"
                   />
                   <button
                     type="submit"
                     disabled={submitting || !flag.trim()}
-                    className="px-6 py-2.5 rounded-lg bg-linear-to-r from-emerald-500 to-teal-500 text-white font-semibold hover:shadow-lg hover:shadow-emerald-500/50 disabled:opacity-50 transition-all duration-200 active:scale-95 whitespace-nowrap"
+                    className="px-6 py-2 rounded-lg bg-linear-to-r from-emerald-500 to-teal-500 text-white font-semibold hover:shadow-lg hover:shadow-emerald-500/50 disabled:opacity-50 transition-all duration-200 active:scale-95 whitespace-nowrap text-sm"
                   >
                     {submitting ? (
                       <span className="flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         Submitting...
                       </span>
                     ) : (
@@ -225,8 +259,8 @@ export default function ChallengeDetailModal({
               {/* Error Message */}
               {error && (
                 <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 flex items-start gap-3">
-                  <XCircle size={18} className="text-red-400 shrink-0 mt-0.5" />
-                  <p className="text-red-300 text-sm font-medium">{error}</p>
+                  <XCircle size={16} className="text-red-400 shrink-0 mt-0.5" />
+                  <p className="text-red-300 text-xs font-medium">{error}</p>
                 </div>
               )}
 
@@ -242,10 +276,10 @@ export default function ChallengeDetailModal({
                   {submissionResult.correct ? (
                     <>
                       <CheckCircle
-                        size={18}
+                        size={16}
                         className="text-green-400 shrink-0 mt-0.5"
                       />
-                      <p className="text-green-300 text-sm font-medium">
+                      <p className="text-green-300 text-xs font-medium">
                         {submissionResult.message ||
                           "🎉 Correct flag! Well done!"}
                       </p>
@@ -253,10 +287,10 @@ export default function ChallengeDetailModal({
                   ) : (
                     <>
                       <XCircle
-                        size={18}
+                        size={16}
                         className="text-red-400 shrink-0 mt-0.5"
                       />
-                      <p className="text-red-300 text-sm font-medium">
+                      <p className="text-red-300 text-xs font-medium">
                         {submissionResult.message ||
                           "❌ Incorrect flag. Try again!"}
                       </p>

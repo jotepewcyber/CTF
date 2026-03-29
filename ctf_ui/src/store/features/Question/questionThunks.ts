@@ -1,8 +1,11 @@
 import {
   createQuestions,
+  deleteQuestion,
   getQuestionDetail,
   getQuestionsByCategory,
   submitFlag,
+  updateQuestion,
+  uploadChallengeFiles,
 } from "@/lib/apiClient";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
@@ -42,6 +45,54 @@ export const createChallengeThunk = createAsyncThunk(
       return res.data;
     } catch (err: any) {
       return rejectWithValue(err.message || "Failed to create challenge");
+    }
+  },
+);
+
+export const updateChallengeThunk = createAsyncThunk(
+  "challenges/update",
+  async (
+    { challengeId, data }: { challengeId: number; data: any },
+    { rejectWithValue },
+  ) => {
+    try {
+      const res = await updateQuestion(challengeId, data);
+      return res.data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.detail || "Failed to update challenge",
+      );
+    }
+  },
+);
+
+export const deleteChallengeThunk = createAsyncThunk(
+  "challenges/delete",
+  async (challengeId: number, { rejectWithValue }) => {
+    try {
+      await deleteQuestion(challengeId);
+      return challengeId;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.detail || "Failed to delete challenge",
+      );
+    }
+  },
+);
+
+export const uploadChallengeFilesThunk = createAsyncThunk(
+  "challenges/uploadFiles",
+  async (
+    { challengeId, files }: { challengeId: number; files: File[] },
+    { rejectWithValue },
+  ) => {
+    try {
+      const res = await uploadChallengeFiles(challengeId, files);
+      return res.data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.detail || "Failed to upload files",
+      );
     }
   },
 );
