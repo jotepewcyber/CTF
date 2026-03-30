@@ -41,8 +41,14 @@ export default function ChallengesPage() {
     dispatch(fetchCompetitionInfoThunk());
   }, [dispatch]);
 
-  // Block if competition not running
+  // Block if competition not running (ONLY for non-admins)
   useEffect(() => {
+    // ✅ Admins can always access challenges
+    if (isAdmin) {
+      return;
+    }
+
+    // ✅ For regular users, block if competition not running
     if (!competitionLoading && competition) {
       const now = new Date();
       const start = new Date(competition.start_time);
@@ -53,16 +59,17 @@ export default function ChallengesPage() {
         router.replace("/competition?ended=1");
       }
     }
-  }, [competition, competitionLoading, router]);
+  }, [isAdmin, competitionLoading, competition, router]); // ✅ Fixed: Always include all 4 dependencies
 
   const handleEditCategory = (category: { id: number; name: string }) => {
     setSelectedCategory(category);
     setEditModalOpen(true);
   };
 
-  if (competitionLoading || !competition) {
+  // Show loading only for non-admins waiting for competition check
+  if (!isAdmin && (competitionLoading || !competition)) {
     return (
-      <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/50">
+      <div className="fixed inset-0 flex items-center justify-center bg-slate-950/50">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin mx-auto"></div>
           <p className="text-emerald-200 mt-4 font-semibold">
@@ -77,7 +84,7 @@ export default function ChallengesPage() {
     <div className="relative w-full min-h-screen pt-15 md:pt-0">
       <Lights />
 
-      <div className="relative z-40 w-full">
+      <div className="relative w-full">
         {/* Header Section */}
         <div className="px-6 md:px-12 py-8 md:mt-4 md:mx-6 md:rounded-xl border-b md:border border-emerald-500/10 bg-linear-to-r from-slate-900/50 via-slate-900/30 to-slate-900/50 backdrop-blur-sm">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -86,7 +93,9 @@ export default function ChallengesPage() {
                 Challenges
               </h1>
               <p className="text-emerald-200/60 mt-2">
-                Complete challenges to earn points
+                {isAdmin
+                  ? "Admin Panel - Manage all challenges"
+                  : "Complete challenges to earn points"}
               </p>
             </div>
             <AddCategoryButton
@@ -95,6 +104,18 @@ export default function ChallengesPage() {
             />
           </div>
         </div>
+
+        {/* Admin Notice */}
+        {isAdmin && competition && (
+          <div className="px-6 md:px-12 py-4">
+            <div className="max-w-4xl mx-auto p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+              <p className="text-blue-300 text-sm">
+                ℹ️ <span className="font-semibold">Admin Mode:</span> You can
+                manage challenges even when the competition is not running.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Add Category Modal */}
         <CategoryModal open={modalOpen} onClose={() => setModalOpen(false)}>
