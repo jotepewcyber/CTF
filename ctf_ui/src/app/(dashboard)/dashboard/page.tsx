@@ -72,7 +72,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/50">
+      <div className="fixed inset-0  flex items-center justify-center bg-slate-950/50">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin mx-auto"></div>
           <p className="text-emerald-200 mt-4 font-semibold">
@@ -87,7 +87,7 @@ export default function DashboardPage() {
     return (
       <div className="relative w-full min-h-screen pt-15 md:pt-0">
         <Lights />
-        <div className="relative z-40 w-full">
+        <div className="relative w-full">
           {/* Top Section - Create Button */}
           <div className="px-6 md:px-12 py-6 border-b border-emerald-500/10 md:mt-4 md:rounded-xl md:mx-6 md:border">
             <div className="flex justify-between items-center">
@@ -134,7 +134,7 @@ export default function DashboardPage() {
   return (
     <div className="relative w-full min-h-screen pt-15 md:pt-0">
       <Lights />
-      <div className="relative z-40 w-full">
+      <div className="relative w-full">
         {/* Header Section with Actions */}
         <div className="px-6 md:px-12 py-6 md:py-8 md:mt-4 md:mx-6 md:rounded-xl border-b md:border border-emerald-500/10 bg-linear-to-r from-slate-900/50 via-slate-900/30 to-slate-900/50 backdrop-blur-sm">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
