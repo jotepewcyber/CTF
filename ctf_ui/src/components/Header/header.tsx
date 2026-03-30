@@ -3,21 +3,18 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { ChevronDown, Menu, LogOut, User } from "lucide-react";
-// import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store";
-import { useLogout } from "@/lib/hooks/useLogout";
+import type { RootState } from "@/store";
+import { useLogout } from "@/lib/hooks/useLogout"; // ✅ Import hook
 
 type HeaderProps = {
   onSidebarToggle?: () => void;
 };
 
-// Returns first letter of user's first_name or "C" as fallback for avatar
 function getAvatarLetter(user: any) {
   return (user?.first_name?.[0] || "C").toUpperCase();
 }
 
-// Returns user's first_name or fallback "Profile"
 function getUserDisplayName(user: any) {
   return user?.first_name || "Profile";
 }
@@ -27,10 +24,11 @@ export default function Header({ onSidebarToggle }: HeaderProps) {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [show, setShow] = useState(true);
   const lastScroll = useRef(0);
-  // const router = useRouter();
+
   const userFromRedux = useSelector((state: RootState) => state.auth.user);
   const [user, setUser] = useState<any>(userFromRedux);
-  const { logout } = useLogout();
+
+  const { logout } = useLogout(); // ✅ Use hook
 
   // Hide on scroll
   useEffect(() => {
@@ -67,22 +65,17 @@ export default function Header({ onSidebarToggle }: HeaderProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
-  // Hydrating the user from localStorage
+  // Sync user from Redux
   useEffect(() => {
     if (userFromRedux) {
       setUser(userFromRedux);
-    } else {
-      try {
-        const userLS = localStorage.getItem("user");
-        if (userLS) {
-          setUser(JSON.parse(userLS));
-        }
-      } catch {}
     }
   }, [userFromRedux]);
 
-  const handleLogout = () => {
-    logout();
+  // ✅ Simple logout handler
+  const handleLogout = async () => {
+    await logout(); // ✅ That's it!
+    setMenuOpen(false);
   };
 
   return (
@@ -170,10 +163,7 @@ export default function Header({ onSidebarToggle }: HeaderProps) {
                   </Link>
                   <button
                     className="w-full flex items-center gap-2 px-4 py-2.5 text-red-400/80 hover:text-red-300 hover:bg-red-500/10 transition-all duration-150 text-sm"
-                    onClick={() => {
-                      handleLogout();
-                      setMenuOpen(false);
-                    }}
+                    onClick={handleLogout}
                   >
                     <LogOut size={16} />
                     Logout
@@ -273,10 +263,7 @@ export default function Header({ onSidebarToggle }: HeaderProps) {
                 </Link>
                 <button
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-red-400/80 hover:text-red-300 hover:bg-red-500/10 transition-all duration-150 text-sm group"
-                  onClick={() => {
-                    handleLogout();
-                    setMenuOpen(false);
-                  }}
+                  onClick={handleLogout}
                 >
                   <LogOut size={16} className="group-hover:text-red-400" />
                   Logout

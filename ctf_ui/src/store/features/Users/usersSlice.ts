@@ -1,19 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchUsersThunk } from "./usersThunks";
-
-export interface User {
-  id: number;
-  username: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  avatar_url?: string | null;
-  course?: string;
-  branch?: string;
-  year?: number | null;
-  role?: string;
-  // ...other fields if you want
-}
+import {
+  fetchUsersThunk,
+  updateUserThunk,
+  deleteUserThunk,
+} from "./usersThunks";
+import { User } from "@/types/users";
 
 interface UsersState {
   users: User[];
@@ -44,6 +35,15 @@ const usersSlice = createSlice({
       .addCase(fetchUsersThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(updateUserThunk.fulfilled, (state, action) => {
+        const index = state.users.findIndex((u) => u.id === action.payload.id);
+        if (index !== -1) {
+          state.users[index] = action.payload;
+        }
+      })
+      .addCase(deleteUserThunk.fulfilled, (state, action) => {
+        state.users = state.users.filter((u) => u.id !== action.payload);
       });
   },
 });

@@ -1,47 +1,61 @@
 "use client";
-
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
-import type { AppDispatch } from "@/store";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store";
 import { logoutThunk } from "@/store/features/Auth/authThunks";
+import { clearSuccessMessage } from "@/store/features/Auth/authSlice";
 import { useToast } from "@/components/ui-elements/toast";
 
 type LogoutOptions = {
   redirectTo?: string;
-  successMessage?: string;
-  errorMessage?: string;
+  showMessage?: boolean;
 };
 
 export function useLogout() {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { showToast } = useToast();
+  const successMessage = useSelector(
+    (state: RootState) => state.auth.successMessage,
+  );
 
+  // ✅ logout function
   const logout = useCallback(
     async (options: LogoutOptions = {}) => {
-      const {
-        redirectTo = "/login",
-        successMessage = "Logged out successfully.",
-        errorMessage = "Logout failed. Please try again.",
-      } = options;
+      const { redirectTo = "/login", showMessage = true } = options;
 
       try {
+        // ✅ Dispatch thunk
         await dispatch(logoutThunk()).unwrap();
-        showToast(successMessage, "success", "bottom-right");
+
+        // ✅ Show success message
+        if (showMessage) {
+          showToast(
+            successMessage || "Logged out successfully!",
+            "success",
+            "bottom-right",
+          );
+        }
+
+        // ✅ Clear state
+        dispatch(clearSuccessMessage());
+
+        // ✅ Redirect
         router.push(redirectTo);
       } catch (error: any) {
-        const message =
+        console.error("❌ Logout error:", error);
+
+        const errorMessage =
           error?.response?.data?.detail ||
           error?.response?.data?.error ||
           error?.message ||
-          errorMessage;
+          "Logout failed. Please try again.";
 
-        showToast(String(message), "error", "bottom-right");
-        throw error;
+        showToast(String(errorMessage), "error", "bottom-right");
       }
     },
-    [dispatch, router, showToast],
+    [dispatch, router, showToast, successMessage],
   );
 
   return { logout };

@@ -1,12 +1,14 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "@/store";
 import { fetchUsersThunk } from "@/store/features/Users/usersThunks";
 import UsersList from "@/components/Users/UsersList";
+import EditUserModal from "@/components/Users/EditUserModal";
 import { motion } from "framer-motion";
 import { Users as UsersIcon, UserCheck } from "lucide-react";
 import Lights from "@/components/Dashboard/dashboard";
+import { User } from "@/types/users";
 
 export default function UsersPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -14,23 +16,27 @@ export default function UsersPage() {
   const loading = useSelector((state: RootState) => state.users.loading);
   const error = useSelector((state: RootState) => state.users.error);
 
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
   useEffect(() => {
     dispatch(fetchUsersThunk());
   }, [dispatch]);
 
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setEditModalOpen(true);
+  };
+
   return (
     <div className="relative w-full min-h-screen bg-black text-white">
-      {/* Lights Background - Fixed */}
       <div className="fixed inset-0 z-0 w-screen h-screen pointer-events-none">
         <Lights />
       </div>
 
-      {/* Dark Overlay */}
       <div className="fixed inset-0 z-5 bg-black/20 pointer-events-none" />
 
-      {/* Content - Relative Z-10 */}
       <div className="relative z-10 w-full py-20 px-6">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -49,7 +55,6 @@ export default function UsersPage() {
           </p>
         </motion.div>
 
-        {/* Content */}
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <motion.div
@@ -73,7 +78,17 @@ export default function UsersPage() {
               </p>
             </motion.div>
           ) : (
-            <UsersList users={users} />
+            <>
+              <UsersList users={users} onEditUser={handleEditUser} />
+              <EditUserModal
+                open={editModalOpen}
+                onClose={() => {
+                  setEditModalOpen(false);
+                  setSelectedUser(null);
+                }}
+                user={selectedUser}
+              />
+            </>
           )}
         </div>
       </div>

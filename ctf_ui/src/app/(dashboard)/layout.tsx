@@ -2,17 +2,32 @@
 import { useState } from "react";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Header from "@/components/Header/header";
-import ReduxProvider from "@/providers/ReduxProvider";
-import AuthGuard from "@/components/AuthGuard";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = useSelector((state: RootState) => state.auth.user);
+  const status = useSelector((state: RootState) => state.auth.status);
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarPlClass = sidebarCollapsed ? "md:pl-20" : "md:pl-64";
+
+  // ✅ Show loading only if currently fetching
+  if (status === "loading" && !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-emerald-200 font-semibold">Loading user data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full relative overflow-x-hidden">
@@ -26,7 +41,7 @@ export default function DashboardLayout({
         aria-hidden="true"
       />
 
-      {/* Layout Content (z-10 to render ABOVE background) */}
+      {/* Layout Content */}
       <div className="relative z-10">
         <Sidebar
           open={sidebarOpen}
@@ -44,11 +59,7 @@ export default function DashboardLayout({
           </div>
 
           {/* Page content */}
-          <div className="pt-6 px-6 md:px-8">
-            <ReduxProvider>
-              <AuthGuard>{children}</AuthGuard>
-            </ReduxProvider>
-          </div>
+          <div className="pt-6 px-6 md:px-8">{children}</div>
         </div>
       </div>
     </div>

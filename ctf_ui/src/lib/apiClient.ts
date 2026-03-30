@@ -3,7 +3,10 @@ import api from "./axios";
 // Wrapper functions (customize as needed)
 export const registerUser = (data: any) => api.post("accounts/register/", data);
 export const loginUser = (data: any) => api.post("accounts/login/", data);
+
+//my-profile
 export const fetchMe = () => api.get("accounts/me/");
+export const updateMe = (data: any) => api.put("accounts/me/", data);
 export const refreshAccess = () => api.post("accounts/refresh/");
 
 // CATEGORY
@@ -54,7 +57,15 @@ export const submitFlag = (challengeId: number, flag: string) =>
 
 export const getScoreboard = () => api.get("challenges/scoreboard/");
 
+//USERS
 export const getUsers = () => api.get("accounts/users/");
+export const updateUser = (userId: number, data: any) => {
+  return api.put(`accounts/users/${userId}/`, data);
+};
+
+export const deleteUser = (userId: number) => {
+  return api.delete(`accounts/users/${userId}/`);
+};
 
 //endpoint for competition
 // Public: Get current competition info (for timer)
