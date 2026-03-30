@@ -6,6 +6,7 @@ from .serializers import UserRegisterSerializer, UserDisplaySerializer
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, BasePermission
+from django.shortcuts import get_object_or_404
 
 class IsAdminRole(BasePermission):
     def has_permission(self, request, view):
@@ -55,6 +56,27 @@ class UserListAPIView(APIView):
         users = User.objects.all()
         serializer = UserDisplaySerializer(users, many=True)
         return Response(serializer.data)
+    
+class UserDetailAdminAPIView(APIView):
+    permission_classes = [IsAdminRole]
+
+    def get(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        serializer = UserDisplaySerializer(user)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        serializer = UserDisplaySerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'User updated.'})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        user.delete()
+        return Response({'message': 'User deleted.'}, status=status.HTTP_204_NO_CONTENT)
 
 # --- User Profile Management ---
 class UserDetailAPIView(APIView):
@@ -65,24 +87,21 @@ class UserDetailAPIView(APIView):
         return Response(serializer.data)
 
     def put(self, request):
-        serializer = UserDisplaySerializer(request.user, data=request.data, partial=True)
+        """Update current user"""
+        serializer = UserDisplaySerializer(
+            request.user, 
+            data=request.data, 
+            partial=True
+        )
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'User updated.'})
+            # ✅ Return the complete updated user
+            return Response({
+                "message": "Profile updated successfully",
+                "user": UserDisplaySerializer(request.user).data  # ✅ Complete user
+            }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request):
-        user = request.user
-        user_id_to_delete = request.query_params.get('user_id')
-        if user.role == 'admin' and user_id_to_delete:
-            try:
-                target_user = User.objects.get(id=user_id_to_delete)
-            except User.DoesNotExist:
-                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-            target_user.delete()
-        else:
-            user.delete()
-        return Response({'message': 'User deleted.'})
 
 # --- Custom Refresh View (gets refresh token from cookie) ---
 class CustomTokenRefreshView(APIView):

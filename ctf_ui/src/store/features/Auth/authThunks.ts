@@ -1,4 +1,5 @@
-import { registerUser, loginUser, fetchMe } from "@/lib/apiClient";
+import { registerUser, loginUser, fetchMe, updateMe } from "@/lib/apiClient";
+import { EditableUserFields } from "@/types/users";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 // SIGNUP THUNK
@@ -60,7 +61,55 @@ export const fetchMeThunk = createAsyncThunk(
   },
 );
 
-// LOGOUT THUNK (client side only)
+export const updateProfileThunk = createAsyncThunk(
+  "auth/updateProfile",
+  async (formData: Partial<EditableUserFields>, { rejectWithValue }) => {
+    try {
+      // ✅ Only allow these fields to be sent to backend
+      const allowedFields: (keyof EditableUserFields)[] = [
+        "username",
+        "first_name",
+        "last_name",
+        "email",
+        "branch",
+        "course",
+        "year",
+        "avatar_url",
+      ];
+
+      const sanitizedData: any = {};
+
+      allowedFields.forEach((field) => {
+        if (field in formData && formData[field] !== undefined) {
+          sanitizedData[field] = formData[field];
+        }
+      });
+
+      // ✅ Make API call with sanitized data
+      const { data } = await updateMe(sanitizedData);
+
+      console.log("✅ Update response:", data); // Debug log
+
+      // ✅ IMPORTANT: Return complete user object, not just data.user
+      // The backend should return the complete updated user
+      return data.user || data || {};
+    } catch (err: any) {
+      const errorDetail =
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        err.response?.data ||
+        err.message;
+
+      return rejectWithValue(
+        typeof errorDetail === "string"
+          ? errorDetail
+          : JSON.stringify(errorDetail),
+      );
+    }
+  },
+);
+
+// LOGOUT THUNK
 export const logoutThunk = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {

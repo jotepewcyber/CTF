@@ -2,9 +2,15 @@
 
 import { User } from "@/types/users";
 import { motion } from "framer-motion";
-import { Mail, BookOpen, GraduationCap, Shield } from "lucide-react";
+import { Mail, BookOpen, GraduationCap, Shield, Edit2 } from "lucide-react";
 
-export default function UsersList({ users }: { users: User[] }) {
+export default function UsersList({
+  users,
+  onEditUser,
+}: {
+  users: User[];
+  onEditUser: (user: User) => void;
+}) {
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
@@ -38,7 +44,7 @@ export default function UsersList({ users }: { users: User[] }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
-      {/* Stats Header - 3 Cards Only */}
+      {/* Stats Header */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="p-6 rounded-xl bg-linear-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
           <p className="text-emerald-200/70 text-sm mb-2">Total Members</p>
@@ -67,10 +73,9 @@ export default function UsersList({ users }: { users: User[] }) {
         </div>
       </div>
 
-      {/* Users Grid - Desktop View */}
+      {/* Desktop Table */}
       <div className="hidden lg:grid grid-cols-1 gap-4 rounded-xl overflow-hidden border border-emerald-500/20 bg-black/40 backdrop-blur-sm">
-        {/* Table Header */}
-        <div className="grid grid-cols-7 gap-4 px-6 py-4 bg-linear-to-r from-emerald-500/10 to-teal-500/10 border-b border-emerald-500/20">
+        <div className="grid grid-cols-8 gap-4 px-6 py-4 bg-linear-to-r from-emerald-500/10 to-teal-500/10 border-b border-emerald-500/20">
           <div className="text-emerald-300 font-bold text-sm">Avatar</div>
           <div className="text-emerald-300 font-bold text-sm">Username</div>
           <div className="text-emerald-300 font-bold text-sm">Full Name</div>
@@ -78,9 +83,9 @@ export default function UsersList({ users }: { users: User[] }) {
           <div className="text-emerald-300 font-bold text-sm">Branch</div>
           <div className="text-emerald-300 font-bold text-sm">Year</div>
           <div className="text-emerald-300 font-bold text-sm">Role</div>
+          <div className="text-emerald-300 font-bold text-sm">Actions</div>
         </div>
 
-        {/* Table Body */}
         <div>
           {users.length > 0 ? (
             users.map((user, idx) => (
@@ -89,9 +94,8 @@ export default function UsersList({ users }: { users: User[] }) {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: idx * 0.05 }}
-                className="grid grid-cols-7 gap-4 px-6 py-4 border-b border-emerald-500/10 hover:bg-emerald-500/5 transition-all items-center"
+                className="grid grid-cols-8 gap-4 px-6 py-4 border-b border-emerald-500/10 hover:bg-emerald-500/5 transition-all items-center"
               >
-                {/* Avatar */}
                 <div>
                   {user.avatar_url ? (
                     <img
@@ -110,21 +114,18 @@ export default function UsersList({ users }: { users: User[] }) {
                   )}
                 </div>
 
-                {/* Username */}
                 <div>
                   <p className="text-emerald-300 font-semibold">
                     {user.username}
                   </p>
                 </div>
 
-                {/* Full Name */}
                 <div>
                   <p className="text-emerald-200/80 text-sm">
                     {user.first_name} {user.last_name}
                   </p>
                 </div>
 
-                {/* Email */}
                 <div>
                   <a
                     href={`mailto:${user.email}`}
@@ -134,27 +135,34 @@ export default function UsersList({ users }: { users: User[] }) {
                   </a>
                 </div>
 
-                {/* Branch */}
                 <div>
                   <span className="text-emerald-200/70 text-sm">
                     {user.branch || "-"}
                   </span>
                 </div>
 
-                {/* Year */}
                 <div>
                   <span className="text-emerald-200/70 text-sm">
                     {user.year ? `${user.year} Year` : "-"}
                   </span>
                 </div>
 
-                {/* Role */}
                 <div>
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${getRoleBadgeColor(user.role)}`}
                   >
                     {user.role || "Member"}
                   </span>
+                </div>
+
+                <div>
+                  <button
+                    onClick={() => onEditUser(user)}
+                    className="p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 transition-all"
+                    title="Edit User"
+                  >
+                    <Edit2 size={16} />
+                  </button>
                 </div>
               </motion.div>
             ))
@@ -166,7 +174,7 @@ export default function UsersList({ users }: { users: User[] }) {
         </div>
       </div>
 
-      {/* Users Cards - Mobile View */}
+      {/* Mobile Cards */}
       <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-6">
         {users.length > 0 ? (
           users.map((user, idx) => (
@@ -177,7 +185,6 @@ export default function UsersList({ users }: { users: User[] }) {
               transition={{ duration: 0.4, delay: idx * 0.05 }}
               className="p-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 transition-all"
             >
-              {/* Header with Avatar */}
               <div className="flex items-center gap-4 mb-4">
                 {user.avatar_url ? (
                   <img
@@ -200,9 +207,15 @@ export default function UsersList({ users }: { users: User[] }) {
                     {user.first_name} {user.last_name}
                   </p>
                 </div>
+                <button
+                  onClick={() => onEditUser(user)}
+                  className="p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300"
+                  title="Edit User"
+                >
+                  <Edit2 size={16} />
+                </button>
               </div>
 
-              {/* Info */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-emerald-400" />
