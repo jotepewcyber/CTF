@@ -5,16 +5,19 @@ import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import { loginThunk } from "@/store/features/Auth/authThunks";
+import LoginPage from "@/components/Login/gaming-login";
+import LoginCard from "@/components/Login/LoginCard";
 
 const initialForm = {
   username: "",
   password: "",
 };
 
-export default function LoginPage() {
+export default function LoginPageComponent() {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
+  const [remember, setRemember] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
@@ -32,15 +35,20 @@ export default function LoginPage() {
     }));
   };
 
-  const validate = () => {
-    const newErrors: typeof errors = {};
-    if (!form.username) newErrors.username = "Username is required";
-    if (!form.password) newErrors.password = "Password is required";
+  const validate = (): { [key: string]: string } => {
+    const newErrors: { [key: string]: string } = {};
+    if (!form.username) {
+      newErrors.username = "Username is required";
+    }
+    if (!form.password) {
+      newErrors.password = "Password is required";
+    }
     return newErrors;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     const currentErrors = validate();
     setErrors(currentErrors);
 
@@ -55,94 +63,48 @@ export default function LoginPage() {
       return;
     }
 
-    const result = await dispatch(loginThunk(form));
+    const result = await dispatch(
+      loginThunk({
+        username: form.username,
+        password: form.password,
+      }),
+    );
+
     // @ts-ignore
     if (result?.meta?.requestStatus === "fulfilled") {
+      if (remember) {
+        localStorage.setItem("rememberMe", "true");
+        localStorage.setItem("savedUsername", form.username);
+      } else {
+        localStorage.removeItem("rememberMe");
+        localStorage.removeItem("savedUsername");
+      }
       router.push("/dashboard");
     }
-    // Error handled by Redux state
   };
 
   return (
-    <main
-      style={{
-        maxWidth: 440,
-        margin: "40px auto",
-        padding: 30,
-        background: "#fff",
-        borderRadius: 6,
-        boxShadow: "0 0 12px #0002",
-      }}
-    >
-      <h1 style={{ textAlign: "center", marginBottom: 16 }}>Login</h1>
-      <form onSubmit={handleSubmit} autoComplete="off">
-        <input
-          name="username"
-          placeholder="Username"
-          value={form.username}
-          onChange={handleChange}
-          onBlur={handleChange}
-          autoComplete="username"
+    <div className="relative min-h-screen w-full flex items-center justify-center px-4 py-12">
+      <LoginPage.VideoBackground videoUrl="https://videos.pexels.com/video-files/8128311/8128311-uhd_2560_1440_25fps.mp4" />
+
+      <div className="relative z-20 w-full max-w-md animate-fadeIn">
+        <LoginCard
+          form={form}
+          errors={errors}
+          touched={touched}
+          remember={remember}
+          status={status}
+          error={error}
+          onFormChange={handleChange}
+          onRememberChange={setRemember}
+          onSubmit={handleSubmit}
         />
-        {touched.username && errors.username && (
-          <div style={{ color: "red" }}>{errors.username}</div>
-        )}
+      </div>
 
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          onBlur={handleChange}
-          autoComplete="current-password"
-        />
-        {touched.password && errors.password && (
-          <div style={{ color: "red" }}>{errors.password}</div>
-        )}
-
-        {error && (
-          <div style={{ color: "red", marginTop: 10 }}>
-            {typeof error === "object" ? JSON.stringify(error) : error}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={status === "loading"}
-          style={{
-            width: "100%",
-            marginTop: 18,
-            padding: "10px 0",
-            fontWeight: "bold",
-            background: status === "loading" ? "#2a2" : "#262",
-            color: "#fff",
-            border: "none",
-            borderRadius: 4,
-            fontSize: 17,
-            cursor: status === "loading" ? "not-allowed" : "pointer",
-          }}
-        >
-          {status === "loading" ? "Logging in..." : "Login"}
-        </button>
-        <div style={{ marginTop: 16, textAlign: "center" }}>
-          Don't have an account? <a href="/signup">Sign up</a>
-        </div>
-      </form>
-      <style jsx>{`
-        input {
-          display: block;
-          width: 100%;
-          margin: 8px 0;
-          padding: 10px 7px;
-          font-size: 17px;
-          border: 1px solid #aaa;
-          border-radius: 4px;
-        }
-        input:focus {
-          outline: 2px solid #7ec0ee;
-        }
-      `}</style>
-    </main>
+      {/* Footer */}
+      <footer className="absolute bottom-4 left-0 right-0 text-center text-white/60 text-sm z-20">
+        © 2025 CTF Arena. All rights reserved.
+      </footer>
+    </div>
   );
 }
