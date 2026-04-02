@@ -95,6 +95,7 @@
 
 import { motion } from "framer-motion";
 import { Trophy, Clock, Zap } from "lucide-react";
+import Link from "next/link";
 
 export const Results = () => {
   return (
@@ -244,9 +245,12 @@ export const Results = () => {
               </p>
 
               <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="px-6 py-3 bg-linear-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-lg hover:shadow-lg hover:shadow-emerald-500/50 transition-all">
+                <Link
+                  href="/signup"
+                  className="px-6 py-3 bg-linear-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-lg hover:shadow-lg hover:shadow-emerald-500/50 transition-all"
+                >
                   Register Now
-                </button>
+                </Link>
               </div>
             </motion.div>
           </div>

@@ -60,6 +60,14 @@ export default function LandingHeader() {
     { href: "#results", label: "Results" },
   ];
 
+  const handleAuthClick = () => {
+    if (typeof window !== "undefined" && localStorage.getItem("access")) {
+      router.push("/dashboard");
+    } else {
+      router.push("/login"); // ✅ This path now works
+    }
+  };
+
   return (
     <>
       {/* Mobile Navbar */}
@@ -118,14 +126,7 @@ export default function LandingHeader() {
                 className="mx-3 px-4 py-2.5 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-lg font-semibold shadow transition-all active:scale-95"
                 onClick={() => {
                   setMenuOpen(false);
-                  if (
-                    typeof window !== "undefined" &&
-                    localStorage.getItem("access")
-                  ) {
-                    router.push("/dashboard");
-                  } else {
-                    router.push("/login");
-                  }
+                  handleAuthClick();
                 }}
               >
                 {isLoggedIn ? "Dashboard" : "Login"}
@@ -170,16 +171,7 @@ export default function LandingHeader() {
 
         <button
           className="px-6 py-2.5 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold rounded-lg shadow-lg transition-all active:scale-95"
-          onClick={() => {
-            if (
-              typeof window !== "undefined" &&
-              localStorage.getItem("access")
-            ) {
-              router.push("/dashboard");
-            } else {
-              router.push("/login");
-            }
-          }}
+          onClick={handleAuthClick}
         >
           {isLoggedIn ? "Dashboard" : "Login"}
         </button>

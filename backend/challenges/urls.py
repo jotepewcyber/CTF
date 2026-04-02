@@ -18,4 +18,4 @@ urlpatterns = [
 
     # scoreboard endpoint
     path('scoreboard/', ScoreboardAPIView.as_view(), name='scoreboard'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] 
