@@ -11,7 +11,7 @@ import EditCategoryForm from "@/components/Challenges/EditCategoryForm";
 import { fetchMeThunk } from "@/store/features/Auth/authThunks";
 import { fetchCompetitionInfoThunk } from "@/store/features/Competition/competitionThunks";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Loader, Edit2 } from "lucide-react";
+import { AlertCircle, Loader } from "lucide-react";
 import Lights from "@/components/Dashboard/dashboard";
 
 export default function ChallengesPage() {
@@ -59,7 +59,7 @@ export default function ChallengesPage() {
         router.replace("/competition?ended=1");
       }
     }
-  }, [isAdmin, competitionLoading, competition, router]); // ✅ Fixed: Always include all 4 dependencies
+  }, [isAdmin, competitionLoading, competition, router]);
 
   const handleEditCategory = (category: { id: number; name: string }) => {
     setSelectedCategory(category);
@@ -156,22 +156,13 @@ export default function ChallengesPage() {
           ) : (
             <div className="space-y-6 max-w-4xl mx-auto">
               {categories.map((cat: any, idx: number) => (
-                <div key={cat.id} className="group relative">
-                  <ChallengeCategory
-                    category={cat}
-                    idx={idx}
-                    isAdmin={isAdmin}
-                  />
-                  {isAdmin && (
-                    <button
-                      onClick={() => handleEditCategory(cat)}
-                      className="absolute top-4 right-16 p-2 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300"
-                      title="Edit Category"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                  )}
-                </div>
+                <ChallengeCategory
+                  key={cat.id}
+                  category={cat}
+                  idx={idx}
+                  isAdmin={isAdmin}
+                  onEditCategory={handleEditCategory}
+                />
               ))}
             </div>
           )}

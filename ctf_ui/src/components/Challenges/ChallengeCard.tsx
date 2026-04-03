@@ -49,7 +49,7 @@ export default function ChallengeCard({
 
   return (
     <div
-      className={`w-full p-5 rounded-lg border-2 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/50 hover:border-emerald-500/50 active:scale-95 text-left group ${colors.bg} ${colors.border}`}
+      className={`w-full p-5 rounded-lg border-2 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/50 hover:border-emerald-500/50 active:scale-95 text-left group cursor-pointer ${colors.bg} ${colors.border}`}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">

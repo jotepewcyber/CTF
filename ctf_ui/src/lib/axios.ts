@@ -36,7 +36,7 @@ api.interceptors.response.use(
       try {
         // ✅ Refresh token endpoint (cookie sent automatically via withCredentials)
         const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}accounts/refresh/`,
+          `${BACKEND_URL}/api/accounts/refresh/`,
           {}, // Empty body
           {
             withCredentials: true,
