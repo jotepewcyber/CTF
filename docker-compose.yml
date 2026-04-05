@@ -1,0 +1,20 @@
+services:
+  backend:
+    build: ./backend
+    container_name: CTF_backend
+    restart: always
+    env_file:
+      - ./backend/.env.prod
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./ctf_ui
+    container_name: CTF_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./ctf_ui/.env
