@@ -25,17 +25,15 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        id: login-ecr
         run: |
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_BACKEND
+          ECR_REGISTRY=$(echo $ECR_REPOSITORY_BACKEND | cut -d'/' -f1)
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
 
-      # Build, tag, and push backend
       - name: Build and push backend Docker image
         run: |
           docker build -t $ECR_REPOSITORY_BACKEND:latest ./backend
           docker push $ECR_REPOSITORY_BACKEND:latest
 
-      # Update ECS Service to use new image (backend)
       - name: Deploy to ECS Backend
         run: |
           aws ecs update-service \
