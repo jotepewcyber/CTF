@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: ap-south-1
-  ECR_REPOSITORY_BACKEND: 091295763720.dkr.ecr.ap-south-1.amazonaws.com/ctf-backend:latest
+  ECR_REPOSITORY_BACKEND: 091295763720.dkr.ecr.ap-south-1.amazonaws.com/ctf-backend
 
 jobs:
   deploy:
