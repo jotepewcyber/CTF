@@ -17,4 +17,4 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./ctf_ui/.env
+      - ./ctf_ui/.env.prod
