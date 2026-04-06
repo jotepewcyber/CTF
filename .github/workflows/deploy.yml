@@ -38,5 +38,5 @@ jobs:
         run: |
           aws ecs update-service \
             --cluster ctf-cluster \
-            --service ctf-backend-service \
+            --service ctf-backend-taskdef-service-xb8qbams \
             --force-new-deployment
