@@ -11,7 +11,7 @@ import {
   deleteChallengeThunk,
 } from "@/store/features/Question/questionThunks";
 import ChallengeDetailModal from "./Questions/ChallengeDetailModal";
-import { ChevronDown, Plus, AlertCircle } from "lucide-react";
+import { ChevronDown, Plus, AlertCircle, Edit2 } from "lucide-react";
 
 type Challenge = {
   id: number;
@@ -30,11 +30,17 @@ type Props = {
   category: { id: number; name: string };
   idx: number;
   isAdmin?: boolean;
+  onEditCategory?: (category: { id: number; name: string }) => void;
 };
 
 const EMPTY: Challenge[] = [];
 
-export default function ChallengeCategory({ category, idx, isAdmin }: Props) {
+export default function ChallengeCategory({
+  category,
+  idx,
+  isAdmin,
+  onEditCategory,
+}: Props) {
   const dispatch = useDispatch<AppDispatch>();
   const [open, setOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -103,16 +109,25 @@ export default function ChallengeCategory({ category, idx, isAdmin }: Props) {
         </button>
 
         {/* Right Side - Actions */}
-        <div className="flex items-center gap-3 ml-4">
+        <div className="flex items-center gap-2 ml-4">
           {isAdmin && (
-            <button
-              onClick={() => setModalOpen(true)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/50 hover:bg-emerald-500/20 text-sm font-semibold transition-all duration-200 active:scale-95"
-              title="Add Challenge"
-            >
-              <Plus size={14} />
-              <span className="hidden sm:inline">Add</span>
-            </button>
+            <>
+              <button
+                onClick={() => onEditCategory?.(category)}
+                className="p-1.5 rounded-lg bg-blue-500/10 text-blue-300 border border-blue-500/30 hover:border-blue-500/50 hover:bg-blue-500/20 transition-all duration-200 active:scale-95"
+                title="Edit Category"
+              >
+                <Edit2 size={16} />
+              </button>
+              <button
+                onClick={() => setModalOpen(true)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/50 hover:bg-emerald-500/20 text-sm font-semibold transition-all duration-200 active:scale-95"
+                title="Add Challenge"
+              >
+                <Plus size={14} />
+                <span className="hidden sm:inline">Add</span>
+              </button>
+            </>
           )}
           <button
             onClick={() => setOpen((v) => !v)}

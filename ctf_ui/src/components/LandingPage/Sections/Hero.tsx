@@ -13,9 +13,12 @@ export const Hero = () => {
         <p className="text-lg md:text-xl text-emerald-200/80 mb-8 relative z-20">
           Master cybersecurity through real-world Capture The Flag challenges
         </p>
-        <button className="px-8 py-3 bg-linear-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-lg shadow-lg hover:shadow-emerald-500/50 transition-all active:scale-95 relative z-20">
+        <a
+          href="/dashboard"
+          className="px-8 py-3 bg-linear-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-lg shadow-lg hover:shadow-emerald-500/50 transition-all active:scale-95 relative z-20"
+        >
           Get Started
-        </button>
+        </a>
       </div>
 
       {/* Splash Cursor */}

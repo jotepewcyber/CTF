@@ -21,6 +21,10 @@ import {
   File,
 } from "lucide-react";
 
+// Get backend URL from environment or default to localhost:8000
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+
 export default function ChallengeDetailModal({
   open,
   onClose,
@@ -67,6 +71,12 @@ export default function ChallengeDetailModal({
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Helper function to get full URL for attachments
+  const getFullUrl = (url: string) => {
+    if (url.startsWith("http")) return url;
+    return `${BACKEND_URL}${url}`;
   };
 
   if (!open || !challengeId) return null;
@@ -191,7 +201,7 @@ export default function ChallengeDetailModal({
                     {challenge.attachments.map((attachment: any) => (
                       <a
                         key={attachment.id}
-                        href={attachment.file}
+                        href={getFullUrl(attachment.file)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-300 hover:text-emerald-200 transition-colors group text-sm"

@@ -66,7 +66,7 @@ export const ContactMethods = () => {
               <div>
                 <p className="text-emerald-200/70 text-sm mb-1">General</p>
                 <a
-                  href="tel:+919876543210"
+                  href="tel:+91 8732056328"
                   className="text-emerald-400 hover:text-emerald-300 text-sm"
                 >
                   +91 873205628
@@ -75,10 +75,10 @@ export const ContactMethods = () => {
               <div>
                 <p className="text-emerald-200/70 text-sm mb-1">Technical</p>
                 <a
-                  href="tel:+919123456789"
+                  href="tel:+91 8732056328"
                   className="text-emerald-400 hover:text-emerald-300 text-sm"
                 >
-                  +91 xxxxxxxx
+                  +91 8732056328
                 </a>
               </div>
             </div>
