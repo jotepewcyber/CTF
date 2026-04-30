@@ -23,7 +23,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
 
 
-
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 
