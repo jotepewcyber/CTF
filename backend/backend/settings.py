@@ -29,9 +29,14 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 # ALLOWED_HOSTS = ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
-ALLOWED_HOSTS = ["*"]
+# ALLOWED_HOSTS = ["*"]
 
-
+ALLOWED_HOSTS=[
+     "localhost", 
+      "ctf-8jrc.onrender.com",
+    "api.arunoday.tech",
+    "127.0.0.1"
+     ]
 # Application definition
 
 INSTALLED_APPS = [
@@ -174,8 +179,10 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:8000",
+     "http://localhost:3000", #Testing
+     "http://localhost:8000", #Testing
+    "https://ctf-ui.vercel.app",
+    "https://ctf.arunoday.tech", #Production
 ]
 
 
